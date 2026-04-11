@@ -10,8 +10,9 @@ const NAV_LINKS = [
   { label: "Rooms", href: "/rooms" },
   { label: "Amenities", href: "/amenities" },
   { label: "Gallery", href: "/gallery" },
-  { label: "Location", href: "/#location" },
-  { label: "Contact", href: "/#contact" },
+  { label: "Rates", href: "/rates" },
+  { label: "Location", href: "/location" },
+  { label: "Contact", href: "/contact" },
 ];
 
 /* ── Variants (target values only — transitions on elements) ── */
@@ -84,7 +85,7 @@ export default function Navbar() {
         {/* Right side */}
         <div className="flex items-center gap-6 relative z-10">
           {/* Book Now — desktop only */}
-          <Link href="#contact" className="hidden lg:inline-block book-btn">
+          <Link href="/contact" className="hidden lg:inline-block book-btn">
             Book Now
           </Link>
 
@@ -173,7 +174,7 @@ export default function Navbar() {
                 transition={{ duration: 0.5, ease: "easeOut" }}
                 className="mt-5"
               >
-                <Link href="#contact" className="book-btn" onClick={close}>
+                <Link href="/contact" className="book-btn" onClick={close}>
                   Book Now
                 </Link>
               </motion.div>

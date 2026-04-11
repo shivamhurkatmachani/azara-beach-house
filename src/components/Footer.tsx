@@ -2,12 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 
 const FOOTER_NAV = [
-  { label: "The Villa", href: "#villa" },
-  { label: "Rooms", href: "#rooms" },
-  { label: "Amenities", href: "#amenities" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Location", href: "#location" },
-  { label: "Contact", href: "#contact" },
+  { label: "The Villa", href: "/about" },
+  { label: "Rooms", href: "/rooms" },
+  { label: "Amenities", href: "/amenities" },
+  { label: "Gallery", href: "/gallery" },
+  { label: "Rates", href: "/rates" },
+  { label: "Location", href: "/location" },
+  { label: "Contact", href: "/contact" },
 ];
 
 export default function Footer() {
