@@ -205,7 +205,7 @@ export default function PricingTable() {
             time of booking. A refundable security deposit is collected separately.
           </p>
           <Link
-            href="/contact"
+            href="/book"
             className="book-btn self-start sm:self-auto shrink-0"
           >
             Check Availability

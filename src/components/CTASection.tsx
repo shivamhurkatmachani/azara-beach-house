@@ -81,7 +81,7 @@ export default function CTASection() {
           className="mt-3"
         >
           <Link
-            href="/contact"
+            href="/book"
             className="book-btn text-[11px] px-10 py-4 inline-block"
           >
             Check Availability
