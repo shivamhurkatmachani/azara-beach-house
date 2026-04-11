@@ -6,12 +6,12 @@ import Link from "next/link";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 
 const NAV_LINKS = [
-  { label: "The Villa", href: "#villa" },
-  { label: "Rooms", href: "#rooms" },
-  { label: "Amenities", href: "#amenities" },
-  { label: "Gallery", href: "#gallery" },
-  { label: "Location", href: "#location" },
-  { label: "Contact", href: "#contact" },
+  { label: "The Villa", href: "/about" },
+  { label: "Rooms", href: "/#rooms" },
+  { label: "Amenities", href: "/#amenities" },
+  { label: "Gallery", href: "/#gallery" },
+  { label: "Location", href: "/#location" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 /* ── Variants (target values only — transitions on elements) ── */
