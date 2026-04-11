@@ -1,0 +1,146 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --charcoal:    #0A0A0A;
+  --warm-black:  #111111;
+  --cream:       #F5F0E8;
+  --body:        #C4BDB3;
+  --gold:        #B8976A;
+  --gold-glow:   rgba(184, 151, 106, 0.25);
+  --forest:      #1A3A2A;
+  --border:      rgba(245, 240, 232, 0.06);
+}
+
+/* ─── Base Reset ─────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--charcoal);
+  color: var(--cream);
+  font-family: var(--font-jost), system-ui, sans-serif;
+  font-weight: 300;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ─── Selection ──────────────────────────────────────────────── */
+::selection {
+  background-color: rgba(184, 151, 106, 0.2);
+  color: var(--cream);
+}
+
+/* ─── Scrollbar ──────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 3px;
+}
+::-webkit-scrollbar-track {
+  background: var(--charcoal);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(184, 151, 106, 0.3);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(184, 151, 106, 0.6);
+}
+
+/* ─── Component Layer ────────────────────────────────────────── */
+@layer components {
+
+  /* Navigation link */
+  .nav-link {
+    @apply relative font-jost text-body text-[11px] tracking-wider uppercase
+           transition-colors duration-300 hover:text-cream;
+  }
+
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -3px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: var(--gold);
+    transform: scaleX(0);
+    transform-origin: right center;
+    transition: transform 0.35s ease;
+  }
+
+  .nav-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+
+  /* Book Now CTA */
+  .book-btn {
+    @apply font-jost text-gold text-[10px] tracking-widest uppercase
+           border border-gold/60 px-7 py-3
+           transition-all duration-400 hover:bg-gold hover:text-charcoal
+           hover:border-gold inline-block cursor-pointer;
+    box-shadow: 0 0 0 rgba(184, 151, 106, 0);
+    transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .book-btn:hover {
+    box-shadow: 0 0 28px rgba(184, 151, 106, 0.22);
+  }
+
+  /* Mobile menu link */
+  .mobile-nav-link {
+    @apply font-cormorant text-cream text-5xl font-light tracking-luxury
+           transition-colors duration-300 hover:text-gold block text-center;
+  }
+
+  /* Section label */
+  .section-label {
+    @apply font-jost text-gold text-[10px] tracking-widest uppercase;
+  }
+
+  /* Heading serif */
+  .heading-serif {
+    @apply font-cormorant text-cream font-light tracking-luxury leading-tight;
+  }
+
+  /* Thin divider */
+  .divider {
+    @apply h-px bg-white/5;
+  }
+}
+
+/* ─── Ken Burns animation ───────────────────────────────────── */
+@keyframes kenBurns {
+  0%   { transform: scale(1.0); }
+  100% { transform: scale(1.07); }
+}
+
+.ken-burns {
+  animation: kenBurns 22s ease-in-out infinite alternate;
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* ─── Utility Layer ──────────────────────────────────────────── */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .tracking-luxury {
+    letter-spacing: 0.15em;
+  }
+}
