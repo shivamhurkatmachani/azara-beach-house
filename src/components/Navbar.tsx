@@ -7,7 +7,7 @@ import { motion, AnimatePresence, type Variants } from "framer-motion";
 
 const NAV_LINKS = [
   { label: "The Villa", href: "/about" },
-  { label: "Rooms", href: "/#rooms" },
+  { label: "Rooms", href: "/rooms" },
   { label: "Amenities", href: "/#amenities" },
   { label: "Gallery", href: "/#gallery" },
   { label: "Location", href: "/#location" },
