@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Jost } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import PublicLayout from "@/components/PublicLayout";
 
@@ -40,6 +41,7 @@ export default function RootLayout({
     <html lang="en" className={`${cormorant.variable} ${jost.variable}`}>
       <body className="bg-charcoal text-cream antialiased">
         <PublicLayout>{children}</PublicLayout>
+        <Analytics />
       </body>
     </html>
   );
