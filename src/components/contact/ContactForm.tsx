@@ -37,16 +37,16 @@ const GUEST_OPTIONS = [
 /* ── Shared field label + wrapper ─────────────────────────── */
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="font-jost text-body/40 text-[9px] tracking-widest uppercase mb-2">
+    <p className="font-jost text-cream/70 text-[9px] tracking-widest uppercase mb-2">
       {children}
     </p>
   );
 }
 
 const INPUT_BASE =
-  "w-full bg-transparent border border-white/[0.07] px-4 py-[14px] " +
-  "font-jost text-cream/80 text-[13px] tracking-[0.03em] placeholder:text-body/25 " +
-  "focus:outline-none focus:border-gold/50 focus:text-cream " +
+  "w-full bg-transparent border border-white/[0.2] px-4 py-[14px] " +
+  "font-jost text-cream/90 text-[13px] tracking-[0.03em] placeholder:text-body/50 " +
+  "focus:outline-none focus:border-gold/60 focus:bg-white/[0.02] focus:text-cream " +
   "transition-colors duration-300";
 
 export default function ContactForm() {
@@ -156,9 +156,9 @@ export default function ContactForm() {
                   value={form.countryCode}
                   onChange={set("countryCode")}
                   className={[
-                    "bg-white/[0.03] border border-r-0 border-white/[0.07]",
-                    "px-3 py-[14px] font-jost text-body/60 text-[12px] tracking-wider",
-                    "focus:outline-none focus:border-gold/50 transition-colors duration-300",
+                    "bg-white/[0.03] border border-r-0 border-white/[0.2]",
+                    "px-3 py-[14px] font-jost text-body/80 text-[12px] tracking-wider",
+                    "focus:outline-none focus:border-gold/60 transition-colors duration-300",
                     "cursor-pointer shrink-0 appearance-none",
                   ].join(" ")}
                   style={{ width: "90px" }}

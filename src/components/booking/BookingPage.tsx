@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import BookingCalendar from "./BookingCalendar";
-import { calculatePricing, formatINR, fmtDate, toYMD } from "@/lib/pricing";
+import { calculatePricing, formatINR, fmtDate, toYMD, type DBSeasonRate } from "@/lib/pricing";
 
 /* ─── Types ────────────────────────────────────────────────── */
 type Step = "search" | "villa" | "guest" | "confirmation";
@@ -117,7 +117,9 @@ export default function BookingPage() {
   const [children, setChildren] = useState(0);
   const [promo,    setPromo]    = useState("");
   const [blocked,  setBlocked]  = useState<string[]>([]);
+  const [dbRates,  setDbRates]  = useState<DBSeasonRate[]>([]);
   const [step,     setStep]     = useState<Step>("search");
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   /* ── Villa tab ────────────────────────────────────────── */
   const [villaTab, setVillaTab] = useState<VillaTab>("rates");
@@ -148,10 +150,18 @@ export default function BookingPage() {
       .catch(() => {});
   }, []);
 
-  /* ── Derived pricing ──────────────────────────────────── */
+  /* ── Fetch season rates from DB ───────────────────────── */
+  useEffect(() => {
+    fetch("/api/rates", { cache: "no-store" })
+      .then(r => r.json())
+      .then(d => { if (Array.isArray(d) && d.length > 0) setDbRates(d); })
+      .catch(() => {});
+  }, []);
+
+  /* ── Derived pricing (uses DB rates when available) ──── */
   const pricing = useMemo(
-    () => (checkIn && checkOut ? calculatePricing(checkIn, checkOut) : null),
-    [checkIn, checkOut],
+    () => (checkIn && checkOut ? calculatePricing(checkIn, checkOut, dbRates) : null),
+    [checkIn, checkOut, dbRates],
   );
 
   /* ── Blocked check for selected range ────────────────── */
@@ -190,25 +200,48 @@ export default function BookingPage() {
     e.preventDefault();
     if (!agreed || !pricing || !checkIn || !checkOut) return;
     setSubmitting(true);
+    setSubmitError(null);
     try {
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          checkIn: checkIn.toISOString(),
-          checkOut: checkOut.toISOString(),
-          adults, children,
-          firstName, lastName,
-          email, phone: `${cc} ${phone}`,
-          gstNumber: gst, specialRequests: requests,
-          paymentOption: payOpt,
-          pricing,
+          checkIn:         checkIn.toISOString(),
+          checkOut:        checkOut.toISOString(),
+          nights:          pricing.nights,
+          adults,
+          children,
+          firstName,
+          lastName,
+          email,
+          phone:           `${cc} ${phone}`,
+          gstNumber:       gst || null,
+          specialRequests: requests || null,
+          promoCode:       promo || null,
+          paymentOption:   payOpt,
+          baseTotal:       pricing.baseTotal,
+          gstAmount:       pricing.gstAmount,
+          grandTotal:      pricing.grandTotal,
         }),
       });
-      const { ref } = await res.json();
-      setBookingRef(ref);
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Server error ${res.status}`);
+      }
+
+      const data = await res.json();
+      if (!data.ref) throw new Error("No booking reference returned");
+
+      setBookingRef(data.ref);
       setStep("confirmation");
       setTimeout(() => confirmRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again or contact us on WhatsApp.",
+      );
     } finally {
       setSubmitting(false);
     }
@@ -1043,6 +1076,23 @@ export default function BookingPage() {
                           </>
                         ) : "Confirm Booking"}
                       </button>
+
+                      {/* Error message */}
+                      {submitError && (
+                        <div className="border border-red-500/30 bg-red-500/[0.05] px-4 py-3">
+                          <p className="font-jost text-red-400 text-[11px] tracking-[0.03em] leading-relaxed">
+                            {submitError}
+                          </p>
+                          <a
+                            href="https://wa.me/919090407408"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-jost text-[#25D366] text-[10px] tracking-widest uppercase mt-2 inline-block"
+                          >
+                            Contact us on WhatsApp →
+                          </a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1124,11 +1174,13 @@ export default function BookingPage() {
               )}
 
               {/* Confirmation note */}
-              <p className="font-jost text-body/45 text-[12px] tracking-[0.03em] leading-loose max-w-sm">
-                A confirmation email has been sent to{" "}
-                <span className="text-cream/70">{email}</span>.
-                Your butler will be in touch to arrange every detail of your arrival.
-              </p>
+              <div className="flex flex-col gap-2 max-w-sm text-center">
+                <p className="font-jost text-body/55 text-[12px] tracking-[0.03em] leading-loose">
+                  Booking request received. Our team will contact{" "}
+                  <span className="text-cream/80">{email}</span>{" "}
+                  within <span className="text-gold">24 hours</span> to confirm your booking and arrange every detail.
+                </p>
+              </div>
 
               <div className="h-px w-10 bg-gold/30" />
 

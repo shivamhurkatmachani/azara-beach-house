@@ -65,7 +65,7 @@ body {
   /* Navigation link */
   .nav-link {
     @apply relative font-jost text-body text-[13px] tracking-wider uppercase
-           transition-colors duration-300 hover:text-cream;
+           whitespace-nowrap transition-colors duration-300 hover:text-cream;
   }
 
   .nav-link::after {

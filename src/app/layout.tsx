@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Jost } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import PublicLayout from "@/components/PublicLayout";
 
 const cormorant = Cormorant_Garamond({
   subsets: ["latin"],
@@ -40,9 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${jost.variable}`}>
       <body className="bg-charcoal text-cream antialiased">
-        <Navbar />
-        {children}
-        <Footer />
+        <PublicLayout>{children}</PublicLayout>
       </body>
     </html>
   );
