@@ -70,14 +70,14 @@ const WATER: Activity[] = [
     name: "Jet Skiing & Parasailing",
     desc: "Feel the rush at Candolim and Calangute beaches with world-class water sports",
     vibe: "Adventure", duration: "2–3 hours",
-    image: "https://images.unsplash.com/photo-1626038225708-050e4eb7bca3?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1583008585590-c4ed0010bed6?w=800&q=80",
     gradient: "from-cyan-950 via-blue-900 to-cyan-950",
   },
   {
     name: "Kayaking & Paddleboarding",
     desc: "Explore the calm backwaters of the Nerul River at your own pace",
     vibe: "Relaxation", duration: "Half day",
-    image: "https://images.unsplash.com/photo-1604715892639-f0afaf080f47?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1580259150857-deec54905859?w=800&q=80",
     gradient: "from-teal-950 via-emerald-950 to-teal-950",
   },
   {
@@ -95,7 +95,7 @@ const SKY: Activity[] = [
     name: "Paragliding at Arambol",
     desc: "Soar above the cliffs of North Goa with tandem paragliding over the Arabian Sea",
     vibe: "Adventure", duration: "2–3 hours",
-    image: "https://images.unsplash.com/photo-1697653377498-96153af9a80f?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1551891590-eeac39130199?w=800&q=80",
     gradient: "from-indigo-950 via-purple-950 to-blue-950",
   },
   {
@@ -127,7 +127,7 @@ const LAND: Activity[] = [
     name: "Dudhsagar Waterfall Trek",
     desc: "A jeep safari through the jungle to one of India's tallest waterfalls",
     vibe: "Adventure", duration: "Full day",
-    image: "https://images.unsplash.com/photo-1670758304929-7e637819e6e7?w=800&q=80",
+    image: "https://plus.unsplash.com/premium_photo-1732030992689-b215161ede41?w=800&q=80",
     gradient: "from-emerald-950 via-green-900 to-emerald-950",
   },
   {
@@ -152,7 +152,7 @@ const DINE: Activity[] = [
     name: "Beach Shack Hopping",
     desc: "From Britto's to Thalassa, experience Goa's legendary beachside dining",
     vibe: "Relaxation", duration: "Half day",
-    image: "https://images.unsplash.com/photo-1600869798574-4a5a6640a5b1?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1733411683500-50f83ca70a1b?w=800&q=80",
     gradient: "from-amber-900 via-yellow-900 to-orange-950",
   },
   {
@@ -173,7 +173,7 @@ const DINE: Activity[] = [
     name: "Private Beach Bonfire",
     desc: "Arranged exclusively for Azara guests on a secluded stretch of Candolim Beach",
     vibe: "Romance", duration: "2–3 hours",
-    image: "https://images.unsplash.com/photo-1475483768296-6163e8f6fcf4?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1625119161833-57f8a7009f7b?w=800&q=80",
     gradient: "from-red-950 via-orange-900 to-amber-950",
   },
 ];
@@ -447,15 +447,9 @@ export default function ExperiencesPage() {
             subtitle="The Arabian Sea is your playground. From dawn fishing runs to champagne sunsets aboard a private yacht."
           />
 
-          {/* Featured (yacht) + 2×2 grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Featured — spans full width on mobile, left column on md */}
-            <div className="md:row-span-2">
-              <ActivityCard activity={WATER[0]} size="featured" delay={0} />
-            </div>
-            {/* Remaining 4 in right column, 2×2 */}
-            {WATER.slice(1).map((a, i) => (
-              <ActivityCard key={a.name} activity={a} size="normal" delay={(i + 1) * 0.08} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {WATER.map((a, i) => (
+              <ActivityCard key={a.name} activity={a} size="normal" delay={i * 0.08} />
             ))}
           </div>
         </div>
@@ -481,9 +475,9 @@ export default function ExperiencesPage() {
             subtitle="Altitude changes perspective. Leave the earth behind and see Goa as few ever do."
           />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {SKY.map((a, i) => (
-              <ActivityCard key={a.name} activity={a} size="large" delay={i * 0.1} />
+              <ActivityCard key={a.name} activity={a} size="normal" delay={i * 0.1} />
             ))}
           </div>
         </div>
@@ -509,18 +503,10 @@ export default function ExperiencesPage() {
             subtitle="Goa's soul lives in its streets, its history, and the wild green interior beyond the coast."
           />
 
-          {/* 2-col + featured layout: [casino large | 2-col grid] */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Featured — casino spans 1 column, taller */}
-            <div className="md:col-span-1">
-              <ActivityCard activity={LAND[0]} size="featured" delay={0} />
-            </div>
-            {/* 4 activities in 2×2 on the right */}
-            <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {LAND.slice(1).map((a, i) => (
-                <ActivityCard key={a.name} activity={a} size="normal" delay={(i + 1) * 0.08} />
-              ))}
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {LAND.map((a, i) => (
+              <ActivityCard key={a.name} activity={a} size="normal" delay={i * 0.08} />
+            ))}
           </div>
         </div>
       </section>
