@@ -63,7 +63,7 @@ const WATER: Activity[] = [
     name: "Deep Sea Fishing",
     desc: "Head offshore with experienced fishermen for a catch of kingfish, barracuda, and red snapper",
     vibe: "Adventure", duration: "Full day",
-    image: "https://images.unsplash.com/photo-1606820854416-439b3305ff39?w=800&q=80",
+    image: "https://plus.unsplash.com/premium_photo-1733306638917-e822483019cd?w=800&q=80",
     gradient: "from-blue-950 via-teal-950 to-blue-950",
   },
   {
@@ -120,7 +120,7 @@ const LAND: Activity[] = [
     name: "Old Goa Heritage Walk",
     desc: "Explore UNESCO World Heritage basilicas and 16th-century Portuguese architecture",
     vibe: "Culture", duration: "Half day",
-    image: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?w=800&q=80",
+    image: "https://plus.unsplash.com/premium_photo-1697730390320-8412ee5eae82?w=800&q=80",
     gradient: "from-amber-950 via-orange-950 to-yellow-950",
   },
   {
@@ -134,7 +134,7 @@ const LAND: Activity[] = [
     name: "Night Market & Flea Markets",
     desc: "Arpora Saturday Night Market and Anjuna Flea Market for local crafts, food, and live music",
     vibe: "Culture", duration: "Evening",
-    image: "https://images.unsplash.com/photo-1555448248-2571daf6344b?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1526139334526-f591a54b477c?w=800&q=80",
     gradient: "from-amber-900 via-orange-900 to-amber-950",
   },
   {
@@ -166,7 +166,7 @@ const DINE: Activity[] = [
     name: "Sunset Cruise on the Mandovi",
     desc: "An evening cruise with live music, dinner, and views of Panaji's riverfront",
     vibe: "Romance", duration: "3–4 hours",
-    image: "https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=800&q=80",
+    image: "https://images.unsplash.com/photo-1585793753011-397e6e4668d6?w=800&q=80",
     gradient: "from-orange-950 via-red-900 to-purple-950",
   },
   {
