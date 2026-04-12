@@ -67,3 +67,16 @@ model Policy {
   key   String @id
   value String
 }
+
+model ContactInquiry {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  name      String
+  email     String
+  phone     String?
+  checkIn   String?
+  checkOut  String?
+  guests    String?
+  message   String?
+  status    String   @default("new")
+}

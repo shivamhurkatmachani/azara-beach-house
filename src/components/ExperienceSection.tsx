@@ -71,7 +71,7 @@ export default function ExperienceSection() {
               className="group relative overflow-hidden h-[460px] md:h-[540px] lg:h-[600px] cursor-pointer block"
               style={{ transition: "transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)" }}
             >
-              <Link href="#amenities" className="absolute inset-0 z-20" aria-label={card.label} />
+              <Link href="/amenities" className="absolute inset-0 z-20" aria-label={card.label} />
 
               {/* Image — scales on group-hover */}
               <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">

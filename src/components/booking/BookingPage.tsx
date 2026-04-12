@@ -120,6 +120,9 @@ export default function BookingPage() {
   const [dbRates,  setDbRates]  = useState<DBSeasonRate[]>([]);
   const [step,     setStep]     = useState<Step>("search");
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [promoApplied,   setPromoApplied]   = useState<{ code: string; discount: number } | null>(null);
+  const [promoError,     setPromoError]     = useState<string | null>(null);
+  const [promoLoading,   setPromoLoading]   = useState(false);
 
   /* ── Villa tab ────────────────────────────────────────── */
   const [villaTab, setVillaTab] = useState<VillaTab>("rates");
@@ -152,10 +155,13 @@ export default function BookingPage() {
 
   /* ── Fetch season rates from DB ───────────────────────── */
   useEffect(() => {
-    fetch("/api/rates", { cache: "no-store" })
+    fetch(`/api/rates?t=${Date.now()}`, { cache: "no-store" })
       .then(r => r.json())
-      .then(d => { if (Array.isArray(d) && d.length > 0) setDbRates(d); })
-      .catch(() => {});
+      .then(d => {
+        console.log("[rates]", d);
+        if (Array.isArray(d) && d.length > 0) setDbRates(d);
+      })
+      .catch(err => console.error("[rates error]", err));
   }, []);
 
   /* ── Derived pricing (uses DB rates when available) ──── */
@@ -163,6 +169,22 @@ export default function BookingPage() {
     () => (checkIn && checkOut ? calculatePricing(checkIn, checkOut, dbRates) : null),
     [checkIn, checkOut, dbRates],
   );
+
+  const discountedPricing = useMemo(() => {
+    if (!pricing || !promoApplied) return null;
+    const discountAmount = Math.round(pricing.baseTotal * (promoApplied.discount / 100));
+    const discountedBase = pricing.baseTotal - discountAmount;
+    const gstAmount      = Math.round(discountedBase * 0.18);
+    const grandTotal     = discountedBase + gstAmount;
+    return {
+      ...pricing,
+      discountAmount,
+      discountedBase,
+      gstAmount,
+      grandTotal,
+      halfPayNow: Math.round(grandTotal / 2),
+    };
+  }, [pricing, promoApplied]);
 
   /* ── Blocked check for selected range ────────────────── */
   const rangeHasBlocked = useMemo(() => {
@@ -172,13 +194,6 @@ export default function BookingPage() {
     while (c < checkOut) { if (bs.has(toYMD(c))) return true; c.setDate(c.getDate() + 1); }
     return false;
   }, [checkIn, checkOut, blocked]);
-
-  /* ── Cancellation date (7 days before check-in) ──────── */
-  const cancelDate = useMemo(() => {
-    if (!checkIn) return null;
-    const d = new Date(checkIn); d.setDate(d.getDate() - 7);
-    return fmtDate(d);
-  }, [checkIn]);
 
   /* ── Handlers ─────────────────────────────────────────── */
   function handleCalendarChange(ci: Date | null, co: Date | null) {
@@ -194,6 +209,26 @@ export default function BookingPage() {
   function handleSelectVilla() {
     setStep("guest");
     setTimeout(() => guestRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+  }
+
+  async function handleApplyPromo() {
+    if (!promo.trim()) return;
+    setPromoLoading(true);
+    setPromoError(null);
+    setPromoApplied(null);
+    try {
+      const res = await fetch(`/api/promo/validate?code=${encodeURIComponent(promo.trim())}`);
+      const data = await res.json();
+      if (data.valid) {
+        setPromoApplied({ code: data.code, discount: data.discount });
+      } else {
+        setPromoError(data.error || "Invalid promo code");
+      }
+    } catch {
+      setPromoError("Failed to validate promo code");
+    } finally {
+      setPromoLoading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -219,9 +254,9 @@ export default function BookingPage() {
           specialRequests: requests || null,
           promoCode:       promo || null,
           paymentOption:   payOpt,
-          baseTotal:       pricing.baseTotal,
-          gstAmount:       pricing.gstAmount,
-          grandTotal:      pricing.grandTotal,
+          baseTotal:       (discountedPricing ?? pricing).baseTotal,
+          gstAmount:       (discountedPricing ?? pricing).gstAmount,
+          grandTotal:      (discountedPricing ?? pricing).grandTotal,
         }),
       });
 
@@ -356,19 +391,42 @@ export default function BookingPage() {
                 <p className="font-jost text-body/55 text-[9px] tracking-widest uppercase mb-3">
                   Guests
                 </p>
-                <Counter label="Adults"                     value={adults}   min={1} max={12} onChange={setAdults} />
-                <Counter label="Children (0–13 years)"      value={children} min={0} max={8}  onChange={setChildren} />
+                <Counter label="Adults"                value={adults}   min={1} max={10} onChange={v => { setAdults(v); if (v + children > 12) setChildren(12 - v); }} />
+                <Counter label="Children (0–13 years)" value={children} min={0} max={Math.min(2, 12 - adults)} onChange={setChildren} />
 
                 {/* Promo code */}
                 <div className="mt-5">
                   <Label>Promo Code (optional)</Label>
-                  <input
-                    type="text"
-                    placeholder="Enter code"
-                    value={promo}
-                    onChange={e => setPromo(e.target.value)}
-                    className={FIELD}
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Enter code"
+                      value={promo}
+                      onChange={e => { setPromo(e.target.value); setPromoApplied(null); setPromoError(null); }}
+                      className={FIELD}
+                      style={{ textTransform: "uppercase" }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleApplyPromo}
+                      disabled={!promo.trim() || promoLoading}
+                      className="shrink-0 border border-gold/50 px-4 font-jost text-[10px] tracking-widest
+                                 uppercase text-cream/80 hover:border-gold hover:bg-gold/[0.08]
+                                 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
+                    >
+                      {promoLoading ? "…" : "Apply"}
+                    </button>
+                  </div>
+                  {promoApplied && (
+                    <p className="mt-2 font-jost text-[10px] tracking-wider text-emerald-400">
+                      ✓ {promoApplied.code} applied — {promoApplied.discount}% off!
+                    </p>
+                  )}
+                  {promoError && (
+                    <p className="mt-2 font-jost text-[10px] tracking-wider text-red-400">
+                      {promoError}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -388,7 +446,7 @@ export default function BookingPage() {
                 transition={{ duration: 0.15 }}
               >
                 Check Availability
-                {pricing && ` — ${formatINR(pricing.grandTotal)} total`}
+                {(discountedPricing ?? pricing) && ` — ${formatINR((discountedPricing ?? pricing)!.grandTotal)} total`}
               </motion.button>
             </div>
 
@@ -462,16 +520,6 @@ export default function BookingPage() {
                 </div>
               </div>
 
-              {/* Pricing hint */}
-              <div className="text-center py-2">
-                <p className="font-cormorant text-gold/80 italic font-light text-base
-                               tracking-[0.04em]">
-                  From {formatINR(55000)} / night
-                </p>
-                <p className="font-jost text-body/50 text-[9px] tracking-widest mt-1">
-                  Inclusive of taxes
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -544,7 +592,7 @@ export default function BookingPage() {
                       </div>
                       <div>
                         <span className="font-jost text-body/35 text-[9px] tracking-widest uppercase">Pools</span>
-                        <p className="font-jost text-cream/60 text-[12px] mt-[1px]">2 Private</p>
+                        <p className="font-jost text-cream/60 text-[12px] mt-[1px]">Infinity Pool</p>
                       </div>
                     </div>
                   </div>
@@ -569,7 +617,7 @@ export default function BookingPage() {
                           </p>
                           <p className="font-cormorant text-gold font-light text-2xl
                                          italic leading-none">
-                            {formatINR(pricing.grandTotal)}
+                            {formatINR((discountedPricing ?? pricing).grandTotal)}
                           </p>
                           <p className="font-jost text-body/35 text-[9px] tracking-wider mt-[3px]">
                             Incl. taxes & fees
@@ -629,25 +677,25 @@ export default function BookingPage() {
                               Tariff Inclusive of Breakfast
                             </p>
                             <div className="flex flex-col divide-y divide-white/[0.05]">
-                              {pricing && [
-                                ["Base rate",       formatINR(pricing.baseTotal)],
-                                ["GST (18%)",       formatINR(pricing.gstAmount)],
-                                ["Grand total",     formatINR(pricing.grandTotal)],
-                              ].map(([label, val]) => (
-                                <div key={label}
-                                  className={[
-                                    "flex justify-between py-3",
-                                    label === "Grand total"
-                                      ? "font-medium text-cream"
-                                      : "text-body/60",
-                                  ].join(" ")}>
-                                  <span className="font-jost text-[12px] tracking-[0.02em]">{label}</span>
-                                  <span className={[
-                                    "font-jost text-[13px]",
-                                    label === "Grand total" ? "text-gold" : "",
-                                  ].join(" ")}>{val}</span>
-                                </div>
-                              ))}
+                              {pricing && (() => {
+                                const dp = discountedPricing;
+                                const rows: [string, string, boolean?][] = [
+                                  ["Base rate", formatINR(pricing.baseTotal)],
+                                  ...(dp ? [["Discount (" + promoApplied!.discount + "%)", "−" + formatINR(dp.discountAmount), true] as [string, string, boolean]] : []),
+                                  ["GST (18%)", formatINR(dp ? dp.gstAmount : pricing.gstAmount)],
+                                  ["Grand total", formatINR(dp ? dp.grandTotal : pricing.grandTotal)],
+                                ];
+                                return rows.map(([label, val, isDiscount]) => (
+                                  <div key={label}
+                                    className={[
+                                      "flex justify-between py-3",
+                                      label === "Grand total" ? "font-medium text-cream" : isDiscount ? "text-emerald-400/80" : "text-body/60",
+                                    ].join(" ")}>
+                                    <span className="font-jost text-[12px] tracking-[0.02em]">{label}</span>
+                                    <span className={["font-jost text-[13px]", label === "Grand total" ? "text-gold" : ""].join(" ")}>{val}</span>
+                                  </div>
+                                ));
+                              })()}
                             </div>
 
                             {/* Inclusions */}
@@ -684,18 +732,6 @@ export default function BookingPage() {
 
                           {/* Book now panel */}
                           <div className="flex flex-col gap-4 md:w-[220px] shrink-0">
-                            {cancelDate && (
-                              <div className="border border-white/[0.06] bg-white/[0.02] px-4 py-4">
-                                <p className="font-jost text-[9px] tracking-widest uppercase
-                                              text-body/35 mb-1">
-                                  Book risk free
-                                </p>
-                                <p className="font-jost text-cream/60 text-[11px] leading-relaxed">
-                                  Cancel for free on or before{" "}
-                                  <span className="text-gold">{cancelDate}</span>
-                                </p>
-                              </div>
-                            )}
                             <button
                               type="button"
                               onClick={handleSelectVilla}
@@ -708,7 +744,7 @@ export default function BookingPage() {
                             {pricing && (
                               <p className="font-jost text-body/35 text-[9px] tracking-wider
                                             text-center leading-loose">
-                                {formatINR(pricing.grandTotal)} total for{" "}
+                                {formatINR((discountedPricing ?? pricing).grandTotal)} total for{" "}
                                 {pricing.nights} nights
                               </p>
                             )}
@@ -830,10 +866,10 @@ export default function BookingPage() {
 
                     {/* Phone */}
                     <FieldWrap>
-                      <Label>Phone Number</Label>
+                      <Label>Phone Number *</Label>
                       <div className="flex">
                         <select value={cc} onChange={e => setCC(e.target.value)}
-                          className="bg-white/[0.03] border border-r-0 border-white/[0.08]
+                          className="bg-white/[0.03] border border-r-0 border-white/[0.2]
                                      px-3 py-[13px] font-jost text-body/60 text-[12px]
                                      focus:outline-none focus:border-gold/50 shrink-0
                                      transition-colors duration-300 cursor-pointer appearance-none"
@@ -842,7 +878,7 @@ export default function BookingPage() {
                             <option key={c.v} value={c.v} className="bg-[#0A0A0A] text-cream">{c.l}</option>
                           ))}
                         </select>
-                        <input type="tel" placeholder="Phone number" value={phone}
+                        <input type="tel" required placeholder="Phone number" value={phone}
                           onChange={e => setPhone(e.target.value)}
                           className={FIELD + " flex-1"} />
                       </div>
@@ -872,14 +908,14 @@ export default function BookingPage() {
                             {
                               val: "100" as PayOpt,
                               label: "Pay 100% now",
-                              payNow: pricing.grandTotal,
+                              payNow: (discountedPricing ?? pricing).grandTotal,
                               payLater: 0,
                             },
                             {
                               val: "50" as PayOpt,
                               label: "Pay 50% now, 50% at check-in",
-                              payNow: pricing.halfPayNow,
-                              payLater: pricing.grandTotal - pricing.halfPayNow,
+                              payNow: (discountedPricing ?? pricing).halfPayNow,
+                              payLater: (discountedPricing ?? pricing).grandTotal - (discountedPricing ?? pricing).halfPayNow,
                             },
                           ]).map(opt => (
                             <label key={opt.val}
@@ -997,16 +1033,16 @@ export default function BookingPage() {
                             </span>
                             <span className="font-cormorant text-gold font-light text-2xl
                                              italic tracking-[0.02em]">
-                              {formatINR(pricing.grandTotal)}
+                              {formatINR((discountedPricing ?? pricing).grandTotal)}
                             </span>
                           </div>
 
                           {payOpt === "50" && (
                             <div className="border border-gold/15 bg-gold/[0.03] px-4 py-3">
                               <p className="font-jost text-body/50 text-[10px] tracking-[0.02em] leading-relaxed">
-                                Due now: <span className="text-gold">{formatINR(pricing.halfPayNow)}</span>
+                                Due now: <span className="text-gold">{formatINR((discountedPricing ?? pricing).halfPayNow)}</span>
                                 <br />
-                                Due at check-in: <span className="text-cream/70">{formatINR(pricing.grandTotal - pricing.halfPayNow)}</span>
+                                Due at check-in: <span className="text-cream/70">{formatINR((discountedPricing ?? pricing).grandTotal - (discountedPricing ?? pricing).halfPayNow)}</span>
                               </p>
                             </div>
                           )}
@@ -1049,18 +1085,13 @@ export default function BookingPage() {
                       <p className="font-jost text-body/35 text-[9px] tracking-wider text-center">
                         Last step — confirm your stay now
                       </p>
-                      {cancelDate && (
-                        <p className="font-jost text-cream/40 text-[9px] tracking-wider text-center">
-                          🔒 Book Risk Free · Cancel free before {cancelDate}
-                        </p>
-                      )}
                       <button
                         type="submit"
-                        disabled={!agreed || submitting || !firstName || !email}
+                        disabled={!agreed || submitting || !firstName || !email || !phone}
                         className={[
                           "w-full py-4 font-jost text-[11px] tracking-widest uppercase",
                           "border transition-all duration-300 flex items-center justify-center gap-3",
-                          agreed && !submitting && firstName && email
+                          agreed && !submitting && firstName && email && phone
                             ? "border-gold text-cream bg-gold/[0.1] hover:bg-gold/[0.18] cursor-pointer"
                             : "border-white/[0.07] text-body/25 cursor-not-allowed",
                         ].join(" ")}
@@ -1160,7 +1191,7 @@ export default function BookingPage() {
                       ["Check-out",  fmtDate(checkOut)],
                       ["Duration",   `${pricing.nights} nights`],
                       ["Guests",     `${adults + children} (${adults} adults)`],
-                      ["Total paid", formatINR(payOpt === "50" ? pricing.halfPayNow : pricing.grandTotal)],
+                      ["Total paid", formatINR(payOpt === "50" ? (discountedPricing ?? pricing).halfPayNow : (discountedPricing ?? pricing).grandTotal)],
                     ].map(([label, val]) => (
                       <div key={label} className="bg-[#0D0D0D] px-5 py-4">
                         <p className="font-jost text-body/35 text-[8px] tracking-widest uppercase mb-1">
@@ -1176,9 +1207,9 @@ export default function BookingPage() {
               {/* Confirmation note */}
               <div className="flex flex-col gap-2 max-w-sm text-center">
                 <p className="font-jost text-body/55 text-[12px] tracking-[0.03em] leading-loose">
-                  Booking request received. Our team will contact{" "}
-                  <span className="text-cream/80">{email}</span>{" "}
-                  within <span className="text-gold">24 hours</span> to confirm your booking and arrange every detail.
+                  Booking request received. Our team at{" "}
+                  <span className="text-gold">bookings@azarabeachhouse.com</span>{" "}
+                  will reach out within <span className="text-gold">24 hours</span> to confirm your booking and arrange every detail.
                 </p>
               </div>
 

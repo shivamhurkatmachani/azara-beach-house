@@ -82,7 +82,7 @@ export function calculatePricing(
     baseTotal,
     gstAmount,
     grandTotal,
-    avgNightly: nightRates.length ? Math.round(baseTotal / nightRates.length) : 118750,
+    avgNightly: nightRates.length ? Math.round(baseTotal / nightRates.length) : 0,
     halfPayNow: Math.round(grandTotal / 2),
   };
 }
