@@ -34,13 +34,13 @@ export const ROOMS: RoomData[] = [
       "/images/EZILI BATHROOM_2.jpg",
     ],
     features: [
-      { key: "bed-king",  label: "King Bed"         },
+      { key: "bed-queen", label: "Queen Bed"         },
       { key: "bath",      label: "En-suite Bath"     },
       { key: "ac",        label: "Air-conditioned"   },
       { key: "tv",        label: "Smart TV"          },
       { key: "wardrobe",  label: "Walk-in Wardrobe"  },
     ],
-    bedType: "King",
+    bedType: "Queen",
   },
   {
     id:          "lir",
@@ -59,13 +59,13 @@ export const ROOMS: RoomData[] = [
       "/images/LIR BATHROOM_2.jpg",
     ],
     features: [
-      { key: "bed-king",  label: "King Bed"              },
+      { key: "bed-queen", label: "Queen Bed"              },
       { key: "bath",      label: "En-suite Bath"          },
       { key: "ac",        label: "Air-conditioned"        },
       { key: "tv",        label: "Smart TV"               },
       { key: "seating",   label: "Private Seating Area"   },
     ],
-    bedType: "King",
+    bedType: "Queen",
   },
   {
     id:          "mazu",

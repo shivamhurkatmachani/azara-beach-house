@@ -21,7 +21,7 @@ const REVIEWS = [
   },
 ] as const;
 
-const INTERVAL = 5800;
+const INTERVAL = 5000;
 
 export default function TestimonialsSection() {
   const [current, setCurrent]   = useState(0);
@@ -118,23 +118,54 @@ export default function TestimonialsSection() {
           </AnimatePresence>
         </div>
 
-        {/* Navigation dots */}
-        <div className="flex items-center gap-3 mt-16">
-          {REVIEWS.map((_, i) => (
-            <button
-              key={i}
-              aria-label={`Review ${i + 1}`}
-              onClick={() => advance(i)}
-              className="h-px rounded-full transition-all duration-500 ease-out focus:outline-none"
-              style={{
-                width: i === current ? "2rem" : "0.5rem",
-                backgroundColor:
-                  i === current
-                    ? "rgba(184,151,106,0.7)"
-                    : "rgba(245,240,232,0.18)",
-              }}
-            />
-          ))}
+        {/* Navigation dots + arrows */}
+        <div className="flex items-center gap-6 mt-16">
+          {/* Prev arrow */}
+          <button
+            aria-label="Previous review"
+            onClick={() => advance((current - 1 + REVIEWS.length) % REVIEWS.length)}
+            className="w-8 h-8 flex items-center justify-center border border-white/[0.1]
+                       text-body/40 hover:text-cream hover:border-gold/40
+                       transition-all duration-300 focus:outline-none"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </button>
+
+          {/* Dots */}
+          <div className="flex items-center gap-3">
+            {REVIEWS.map((_, i) => (
+              <button
+                key={i}
+                aria-label={`Review ${i + 1}`}
+                onClick={() => advance(i)}
+                className="h-px rounded-full transition-all duration-500 ease-out focus:outline-none"
+                style={{
+                  width: i === current ? "2rem" : "0.5rem",
+                  backgroundColor:
+                    i === current
+                      ? "rgba(184,151,106,0.7)"
+                      : "rgba(245,240,232,0.18)",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Next arrow */}
+          <button
+            aria-label="Next review"
+            onClick={() => advance((current + 1) % REVIEWS.length)}
+            className="w-8 h-8 flex items-center justify-center border border-white/[0.1]
+                       text-body/40 hover:text-cream hover:border-gold/40
+                       transition-all duration-300 focus:outline-none"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+              <path d="M9 18l6-6-6-6" />
+            </svg>
+          </button>
         </div>
 
       </div>

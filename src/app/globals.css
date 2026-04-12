@@ -64,7 +64,7 @@ body {
 
   /* Navigation link */
   .nav-link {
-    @apply relative font-jost text-body text-[11px] tracking-wider uppercase
+    @apply relative font-jost text-body text-[13px] tracking-wider uppercase
            transition-colors duration-300 hover:text-cream;
   }
 
@@ -88,16 +88,16 @@ body {
 
   /* Book Now CTA */
   .book-btn {
-    @apply font-jost text-gold text-[10px] tracking-widest uppercase
-           border border-gold/60 px-7 py-3
-           transition-all duration-400 hover:bg-gold hover:text-charcoal
+    @apply font-jost text-gold text-[11px] tracking-widest uppercase
+           border border-gold/70 px-8 py-[13px]
+           transition-all duration-300 hover:bg-gold hover:text-charcoal
            hover:border-gold inline-block cursor-pointer;
     box-shadow: 0 0 0 rgba(184, 151, 106, 0);
     transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
   }
 
   .book-btn:hover {
-    box-shadow: 0 0 28px rgba(184, 151, 106, 0.22);
+    box-shadow: 0 0 32px rgba(184, 151, 106, 0.3);
   }
 
   /* Mobile menu link */

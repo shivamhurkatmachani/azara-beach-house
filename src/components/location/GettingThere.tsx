@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-const ADDRESS = "Panchayat Bardez, 449, E Wadi, Candolim, Goa 403515";
+const ADDRESS = "Candolim Panchayat Bardez, 449, E Wadi, Candolim, Goa 403515";
 
 export default function GettingThere() {
   const [copied, setCopied] = useState(false);
@@ -128,7 +128,7 @@ export default function GettingThere() {
 
             {/* WhatsApp CTA */}
             <a
-              href="https://wa.me/919XXXXXXXXX"
+              href="https://wa.me/919090407408"
               target="_blank"
               rel="noopener noreferrer"
               className="group inline-flex items-center gap-3 border border-gold/35 px-6 py-[13px]

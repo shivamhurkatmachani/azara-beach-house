@@ -41,7 +41,7 @@ const VILLA_PHOTOS = [
 /* ─── Shared UI atoms ──────────────────────────────────────── */
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <p className="font-jost text-body/35 text-[9px] tracking-widest uppercase mb-2">
+    <p className="font-jost text-body/55 text-[9px] tracking-widest uppercase mb-2">
       {children}
     </p>
   );
@@ -51,8 +51,8 @@ function FieldWrap({ children, className="" }: { children: React.ReactNode; clas
 }
 
 const FIELD =
-  "w-full bg-transparent border border-white/[0.08] px-4 py-[13px] " +
-  "font-jost text-cream/80 text-[13px] tracking-[0.02em] placeholder:text-body/25 " +
+  "w-full bg-transparent border border-white/[0.2] px-4 py-[13px] " +
+  "font-jost text-cream/90 text-[13px] tracking-[0.02em] placeholder:text-body/40 " +
   "focus:outline-none focus:border-gold/50 focus:text-cream transition-colors duration-300";
 
 /* ─── Counter ──────────────────────────────────────────────── */
@@ -221,7 +221,7 @@ export default function BookingPage() {
     <div className="bg-charcoal min-h-screen">
 
       {/* ── Sticky summary bar ──────────────────────────── */}
-      <div className="sticky top-[76px] z-40 bg-[#111111] border-b border-white/[0.06]
+      <div className="sticky top-[76px] z-40 bg-[#1A1A1A] border-b border-white/[0.06]
                       shadow-[0_4px_24px_rgba(0,0,0,0.5)]">
         <div className="max-w-7xl mx-auto px-5 md:px-10 h-14 flex items-center gap-4 overflow-x-auto
                         scrollbar-none">
@@ -283,12 +283,12 @@ export default function BookingPage() {
                   { label: "Check-out", val: checkOut ? fmtDate(checkOut) : "Select date" },
                 ].map(({ label, val }) => (
                   <div key={label} className="bg-charcoal px-5 py-4">
-                    <p className="font-jost text-body/35 text-[9px] tracking-widest uppercase mb-1">
+                    <p className="font-jost text-body/55 text-[9px] tracking-widest uppercase mb-1">
                       {label}
                     </p>
                     <p className={[
                       "font-cormorant font-light text-2xl tracking-[0.04em] italic",
-                      val.includes("Select") ? "text-body/30" : "text-cream",
+                      val.includes("Select") ? "text-body/50" : "text-cream",
                     ].join(" ")}>
                       {val}
                     </p>
@@ -320,7 +320,7 @@ export default function BookingPage() {
 
               {/* Guests + Promo */}
               <div className="border border-white/[0.06] bg-[#0D0D0D] p-5 md:p-7">
-                <p className="font-jost text-body/35 text-[9px] tracking-widest uppercase mb-3">
+                <p className="font-jost text-body/55 text-[9px] tracking-widest uppercase mb-3">
                   Guests
                 </p>
                 <Counter label="Adults"                     value={adults}   min={1} max={12} onChange={setAdults} />
@@ -374,7 +374,7 @@ export default function BookingPage() {
                   ].map(note => (
                     <div key={note} className="flex items-start gap-3">
                       <div className="mt-[5px] w-1 h-1 rounded-full bg-gold/40 shrink-0" />
-                      <p className="font-jost text-body/50 text-[11px] tracking-[0.03em] leading-relaxed">
+                      <p className="font-jost text-body/75 text-[11px] tracking-[0.03em] leading-relaxed">
                         {note}
                       </p>
                     </div>
@@ -396,7 +396,7 @@ export default function BookingPage() {
                                        border border-gold/35 text-gold/70 px-2 py-[3px] shrink-0 mt-[1px]">
                         {o.badge}
                       </span>
-                      <p className="font-jost text-cream/60 text-[11px] tracking-[0.03em] leading-relaxed">
+                      <p className="font-jost text-cream/80 text-[11px] tracking-[0.03em] leading-relaxed">
                         {o.text}
                       </p>
                     </div>
@@ -421,7 +421,7 @@ export default function BookingPage() {
                         className="text-gold/60 shrink-0">
                         <path d="M20 6L9 17l-5-5" />
                       </svg>
-                      <p className="font-jost text-cream/60 text-[11px] tracking-[0.03em]">
+                      <p className="font-jost text-cream/80 text-[11px] tracking-[0.03em]">
                         {usp}
                       </p>
                     </div>
@@ -431,11 +431,11 @@ export default function BookingPage() {
 
               {/* Pricing hint */}
               <div className="text-center py-2">
-                <p className="font-cormorant text-gold/60 italic font-light text-base
+                <p className="font-cormorant text-gold/80 italic font-light text-base
                                tracking-[0.04em]">
                   From {formatINR(55000)} / night
                 </p>
-                <p className="font-jost text-body/30 text-[9px] tracking-widest mt-1">
+                <p className="font-jost text-body/50 text-[9px] tracking-widest mt-1">
                   Inclusive of taxes
                 </p>
               </div>

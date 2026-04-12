@@ -6,7 +6,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 
 const FEATURES = [
   { value: "13,000", label: "Square Feet" },
-  { value: "2",      label: "Infinity Pools" },
+  { value: "1",      label: "Infinity Pool"  },
   { value: "300m",   label: "from the Sea" },
   { value: "1",      label: "Outdoor Pavilion" },
 ] as const;

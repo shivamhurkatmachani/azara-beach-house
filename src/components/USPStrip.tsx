@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 const STATS = [
   { value: "5",      label: "Bedrooms"      },
   { value: "13,000", label: "Sq. Ft."       },
-  { value: "2",      label: "Infinity Pools" },
+  { value: "1",      label: "Infinity Pool"  },
   { value: "300m",   label: "to the Beach"  },
   { value: "24 / 7", label: "Private Staff" },
 ];

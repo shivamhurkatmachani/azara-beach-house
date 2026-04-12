@@ -65,7 +65,7 @@ export default function Footer() {
             <div className="flex flex-col gap-1 mt-1">
               <p className="font-jost text-body/50 text-[10px] tracking-wider uppercase">WhatsApp</p>
               <a
-                href="https://wa.me/919XXXXXXXXX"
+                href="https://wa.me/919090407408"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-jost text-gold text-sm hover:text-cream transition-colors duration-300 flex items-center gap-2 group w-fit"
@@ -87,10 +87,10 @@ export default function Footer() {
             <div className="flex flex-col gap-1 mt-1">
               <p className="font-jost text-body/50 text-[10px] tracking-wider uppercase">Email</p>
               <a
-                href="mailto:stay@azarabeachhouse.com"
+                href="mailto:bookings@azarabeachhouse.com"
                 className="font-jost text-body text-sm hover:text-cream transition-colors duration-300 w-fit"
               >
-                stay@azarabeachhouse.com
+                bookings@azarabeachhouse.com
               </a>
             </div>
           </div>

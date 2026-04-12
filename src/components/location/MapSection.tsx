@@ -20,7 +20,7 @@ export default function MapSection() {
           style={{ filter: "grayscale(1) invert(0.9) contrast(1.2)" }}
         >
           <iframe
-            src="https://maps.google.com/maps?q=15.512329,73.767483&z=16&output=embed"
+            src="https://maps.google.com/maps?q=15.512323061130836,73.7674542669139&z=16&output=embed"
             width="100%"
             height="100%"
             style={{ border: 0, display: "block" }}
@@ -52,7 +52,7 @@ export default function MapSection() {
 
           {/* Get Directions button */}
           <motion.a
-            href="https://maps.app.goo.gl/uXpTfP8M9N9X6pX68"
+            href="https://maps.app.goo.gl/DnHhpbVUk4ZZkPcW9"
             target="_blank"
             rel="noopener noreferrer"
             className="group inline-flex items-center gap-3 border border-gold/40 px-7 py-[14px]

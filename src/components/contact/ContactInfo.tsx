@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-const ADDRESS = "Panchayat Bardez, 449, E Wadi, Candolim, Goa 403515";
+const ADDRESS = "Candolim Panchayat Bardez, 449, E Wadi, Candolim, Goa 403515";
 
 function FadeUp({ children, delay = 0, className = "" }: {
   children: React.ReactNode; delay?: number; className?: string;
@@ -108,7 +108,7 @@ export default function ContactInfo() {
 
           {/* Email */}
           <a
-            href="mailto:sales@azarabeachhouse.com"
+            href="mailto:bookings@azarabeachhouse.com"
             className="group flex items-center gap-4 py-5
                        hover:bg-white/[0.015] transition-colors duration-300 -mx-1 px-1"
           >
@@ -128,7 +128,7 @@ export default function ContactInfo() {
               </p>
               <p className="font-jost text-cream/70 text-[13px] tracking-[0.03em]
                             group-hover:text-cream transition-colors duration-300">
-                sales@azarabeachhouse.com
+                bookings@azarabeachhouse.com
               </p>
             </div>
           </a>
@@ -251,7 +251,7 @@ export default function ContactInfo() {
             style={{ filter: "grayscale(1) invert(0.9) contrast(1.2)" }}
           >
             <iframe
-              src="https://maps.google.com/maps?q=15.512329,73.767483&z=15&output=embed"
+              src="https://maps.google.com/maps?q=15.512323061130836,73.7674542669139&z=15&output=embed"
               width="100%"
               height="100%"
               style={{ border: 0, display: "block" }}
@@ -267,7 +267,7 @@ export default function ContactInfo() {
 
           {/* Get Directions overlay link */}
           <a
-            href="https://maps.app.goo.gl/uXpTfP8M9N9X6pX68"
+            href="https://maps.app.goo.gl/DnHhpbVUk4ZZkPcW9"
             target="_blank"
             rel="noopener noreferrer"
             className="absolute bottom-4 right-4 z-10

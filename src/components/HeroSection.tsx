@@ -70,6 +70,24 @@ export default function HeroSection() {
           A 13,000 sq. ft. private villa, 300 metres from the Arabian Sea
         </motion.p>
 
+        {/* Book Now CTA */}
+        <motion.a
+          href="/book"
+          className="mb-8 inline-flex items-center gap-3 border border-gold/60 bg-gold/[0.08]
+                     px-8 py-[14px] font-jost text-[11px] tracking-[0.25em] uppercase text-cream/90
+                     hover:bg-gold/[0.18] hover:border-gold hover:text-cream
+                     transition-all duration-300"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.1, duration: 0.9, ease: "easeOut" }}
+        >
+          Book Now
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+            <path d="M9 18l6-6-6-6" />
+          </svg>
+        </motion.a>
+
         {/* Scroll indicator */}
         <motion.div
           className="flex flex-col items-center gap-[10px]"

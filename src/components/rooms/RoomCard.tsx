@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from "react";
 import Image from "next/image";
-import Link from "next/link";
 import { motion } from "framer-motion";
 import type { RoomData } from "@/data/rooms";
 import FeatureIcon from "./FeatureIcon";
@@ -190,14 +189,6 @@ export default function RoomCard({ room, index }: Props) {
                 );
               })}
             </div>
-
-            {/* CTA */}
-            <Link
-              href="/#contact"
-              className="book-btn self-start text-[10px]"
-            >
-              Enquire About This Suite
-            </Link>
 
           </motion.div>
         </div>

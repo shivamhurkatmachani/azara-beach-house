@@ -7,7 +7,7 @@ import { AMENITY_CATEGORIES } from "@/data/amenities";
 export const metadata: Metadata = {
   title: "Amenities — Azara Beach House, Candolim Goa",
   description:
-    "Infrared sauna, two infinity pools, private chef, 24/7 butler service, and 13,000 sq. ft. of tropical grounds. Every amenity at Azara Beach House, Candolim Goa.",
+    "Infrared sauna, infinity pool, private chef, 24/7 butler service, and 13,000 sq. ft. of tropical grounds. Every amenity at Azara Beach House, Candolim Goa.",
 };
 
 export default function AmenitiesPage() {
@@ -63,7 +63,7 @@ export default function AmenitiesPage() {
               Available 24 hours
             </p>
             <a
-              href="https://wa.me/919XXXXXXXXX"
+              href="https://wa.me/919090407408"
               target="_blank"
               rel="noopener noreferrer"
               className="font-jost text-gold text-sm tracking-[0.04em] hover:text-cream

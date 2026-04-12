@@ -110,7 +110,7 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
                 key={toYMD(date)}
                 className={[
                   "relative h-8 flex items-center justify-center",
-                  ir ? "bg-gold/[0.10]" : "",
+                  ir ? "bg-gold/[0.15]" : "",
                   // Flatten left edge on check-out
                   co ? "rounded-r-none" : "",
                 ].join(" ")}
@@ -130,7 +130,7 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
                       : "",
                     /* Disabled */
                     dis
-                      ? "text-body/18 cursor-not-allowed"
+                      ? "text-body/40 cursor-not-allowed"
                       : "cursor-pointer",
                     /* Today */
                     tod && !ci && !co
@@ -138,7 +138,7 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
                       : "",
                     /* Normal hover */
                     !dis && !ci && !co
-                      ? "text-cream/70 hover:bg-gold/25 hover:text-cream hover:rounded-full"
+                      ? "text-cream/90 hover:bg-gold/25 hover:text-cream hover:rounded-full"
                       : "",
                     /* In-range (normal) */
                     ir && !ci && !co && !dis ? "text-cream/80" : "",
@@ -195,19 +195,19 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
       <div className="flex items-center gap-6 mt-5 pt-4 border-t border-white/[0.05]">
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded-full bg-gold" />
-          <span className="font-jost text-body/40 text-[9px] tracking-wider">Selected</span>
+          <span className="font-jost text-body/60 text-[9px] tracking-wider">Selected</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-gold/[0.10]" />
-          <span className="font-jost text-body/40 text-[9px] tracking-wider">Range</span>
+          <div className="w-4 h-4 bg-gold/[0.15]" />
+          <span className="font-jost text-body/60 text-[9px] tracking-wider">Range</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-4 h-4 rounded-full ring-1 ring-gold/40" />
-          <span className="font-jost text-body/40 text-[9px] tracking-wider">Today</span>
+          <span className="font-jost text-body/60 text-[9px] tracking-wider">Today</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="font-jost text-[9px] text-body/18">15</span>
-          <span className="font-jost text-body/40 text-[9px] tracking-wider">Unavailable</span>
+          <span className="font-jost text-[9px] text-body/45">15</span>
+          <span className="font-jost text-body/60 text-[9px] tracking-wider">Unavailable</span>
         </div>
       </div>
     </div>

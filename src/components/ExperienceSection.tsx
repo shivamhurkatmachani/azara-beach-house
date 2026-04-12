@@ -12,8 +12,8 @@ const CARDS = [
     index: "01",
   },
   {
-    label: "Two Infinity Pools",
-    desc: "A rooftop pool under the stars and a chevron-tiled main pool",
+    label: "Infinity Pool",
+    desc: "A rooftop infinity pool under the stars, plus a chevron-tiled main pool",
     image: "/images/Pool_2.jpg",
     index: "02",
   },

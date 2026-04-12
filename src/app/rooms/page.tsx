@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link         from "next/link";
 import RoomsHero    from "@/components/rooms/RoomsHero";
 import RoomCard     from "@/components/rooms/RoomCard";
 import CTASection   from "@/components/CTASection";
@@ -7,7 +8,7 @@ import { ROOMS, SHARED_FEATURES } from "@/data/rooms";
 export const metadata: Metadata = {
   title: "Five Sanctuaries — Rooms at Azara Beach House",
   description:
-    "Five suites named after water deities, each a private world of designer interiors, premium linens, and en-suite bathrooms. King and queen beds. Azara Beach House, Candolim Goa.",
+    "Five suites named after water deities, each a private world of designer interiors, premium linens, and en-suite bathrooms. Queen beds throughout. Azara Beach House, Candolim Goa.",
 };
 
 export default function RoomsPage() {
@@ -49,6 +50,35 @@ export default function RoomsPage() {
                 </p>
               </div>
             ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Book the Villa CTA ──────────────────────────────── */}
+      <div className="border-t border-white/[0.04] bg-[#0D0D0D]">
+        <div className="max-w-7xl mx-auto px-8 md:px-14 lg:px-20 py-20 md:py-28
+                        flex flex-col items-center text-center gap-6">
+          <div className="w-10 h-px bg-gold/30" />
+          <h2 className="font-cormorant text-cream font-light tracking-luxury leading-tight
+                         text-3xl md:text-4xl lg:text-5xl max-w-xl">
+            Book the Entire Villa
+          </h2>
+          <p className="font-jost text-body/55 text-sm tracking-[0.04em] leading-loose max-w-md">
+            Azara is booked exclusively as a whole — all 5 suites are included in your stay.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
+            <Link href="/book" className="book-btn">
+              Check Availability
+            </Link>
+            <a
+              href="https://wa.me/919090407408"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-jost text-body/50 text-[11px] tracking-widest uppercase
+                         hover:text-cream transition-colors duration-300"
+            >
+              Or enquire on WhatsApp →
+            </a>
           </div>
         </div>
       </div>
