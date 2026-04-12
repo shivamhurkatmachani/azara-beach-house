@@ -95,7 +95,7 @@ export default function Navbar() {
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
-            className="lg:hidden flex flex-col justify-center items-end gap-[6px] w-8 h-8 shrink-0"
+            className="lg:hidden flex flex-col justify-center items-end gap-[6px] w-11 h-11 shrink-0 -mr-1"
           >
             <motion.span
               className="block h-px bg-cream origin-center"
@@ -198,7 +198,7 @@ export default function Navbar() {
               >
                 @azarabeachhouse
               </a>
-              <p className="font-jost text-body/40 text-[9px] tracking-wider uppercase">
+              <p className="font-jost text-body/40 text-[10px] tracking-wider uppercase">
                 Candolim, Goa
               </p>
             </motion.div>

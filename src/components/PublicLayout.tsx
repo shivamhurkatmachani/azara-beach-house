@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import WhatsAppFloat from "./WhatsAppFloat";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,6 +17,8 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
       {showChrome && <Navbar />}
       {children}
       {showChrome && <Footer />}
+      {/* Floating WhatsApp button — mobile/tablet only, all non-admin pages */}
+      {!isAdmin && <WhatsAppFloat />}
     </>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -18,6 +18,7 @@ export default function GalleryLightbox({
   images, index, onClose, onPrev, onNext,
 }: Props) {
   const image = images[index];
+  const touchStartX = useRef<number | null>(null);
 
   /* Keyboard navigation */
   const handleKey = useCallback(
@@ -28,6 +29,19 @@ export default function GalleryLightbox({
     },
     [onClose, onPrev, onNext],
   );
+
+  /* Touch swipe navigation */
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  }, []);
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (Math.abs(dx) > 50) {
+      if (dx < 0) onNext(); else onPrev();
+    }
+    touchStartX.current = null;
+  }, [onNext, onPrev]);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKey);
@@ -46,6 +60,8 @@ export default function GalleryLightbox({
       exit={{ opacity: 0 }}
       transition={{ duration: 0.35 }}
       onClick={onClose}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {/* Counter */}
       <div className="absolute top-5 left-1/2 -translate-x-1/2 z-10">
@@ -58,7 +74,7 @@ export default function GalleryLightbox({
       <button
         onClick={onClose}
         aria-label="Close lightbox"
-        className="absolute top-5 right-6 z-10 w-9 h-9 flex items-center justify-center
+        className="absolute top-4 right-4 z-10 w-11 h-11 flex items-center justify-center
                    rounded-full border border-white/[0.08] text-body/60
                    hover:text-cream hover:border-white/20 transition-all duration-200"
       >
@@ -100,7 +116,7 @@ export default function GalleryLightbox({
       <AnimatePresence mode="wait">
         <motion.div
           key={image.src}
-          className="relative w-full h-full flex items-center justify-center px-16 md:px-24 py-20"
+          className="relative w-full h-full flex items-center justify-center px-14 md:px-24 py-16 md:py-20"
           initial={{ opacity: 0, scale: 0.97 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.97 }}

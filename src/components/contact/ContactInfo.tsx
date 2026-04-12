@@ -68,7 +68,7 @@ export default function ContactInfo() {
 
           {/* Text */}
           <div className="flex-1 min-w-0">
-            <p className="font-jost text-[9px] tracking-widest uppercase text-[#25D366]/60 mb-[3px]">
+            <p className="font-jost text-[10px] tracking-widest uppercase text-[#25D366]/60 mb-[3px]">
               Fastest response
             </p>
             <p className="font-cormorant text-cream font-light text-xl
@@ -95,7 +95,7 @@ export default function ContactInfo() {
       <FadeUp delay={0.15}>
         <div className="flex items-center gap-4">
           <div className="flex-1 h-px bg-white/[0.05]" />
-          <p className="font-jost text-body/25 text-[8px] tracking-widest uppercase">
+          <p className="font-jost text-body/25 text-[10px] tracking-widest uppercase">
             or reach us via
           </p>
           <div className="flex-1 h-px bg-white/[0.05]" />
@@ -123,7 +123,7 @@ export default function ContactInfo() {
               </svg>
             </div>
             <div>
-              <p className="font-jost text-body/35 text-[9px] tracking-widest uppercase mb-[2px]">
+              <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase mb-[2px]">
                 Email
               </p>
               <p className="font-jost text-cream/70 text-[13px] tracking-[0.03em]
@@ -153,7 +153,7 @@ export default function ContactInfo() {
               </svg>
             </div>
             <div>
-              <p className="font-jost text-body/35 text-[9px] tracking-widest uppercase mb-[2px]">
+              <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase mb-[2px]">
                 Phone
               </p>
               <p className="font-jost text-cream/70 text-[13px] tracking-[0.03em]
@@ -174,7 +174,7 @@ export default function ContactInfo() {
               </svg>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="font-jost text-body/35 text-[9px] tracking-widest uppercase mb-[2px]">
+              <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase mb-[2px]">
                 Address
               </p>
               <p className="font-jost text-cream/65 text-[12px] tracking-[0.03em]
@@ -227,7 +227,7 @@ export default function ContactInfo() {
               </svg>
             </div>
             <div>
-              <p className="font-jost text-body/35 text-[9px] tracking-widest uppercase mb-[2px]">
+              <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase mb-[2px]">
                 Instagram
               </p>
               <p className="font-jost text-cream/70 text-[13px] tracking-[0.03em]
@@ -271,10 +271,10 @@ export default function ContactInfo() {
             target="_blank"
             rel="noopener noreferrer"
             className="absolute bottom-4 right-4 z-10
-                       font-jost text-[8px] tracking-widest uppercase
+                       font-jost text-[10px] tracking-widest uppercase
                        bg-charcoal/80 backdrop-blur-sm border border-white/[0.08]
-                       text-body/50 hover:text-cream px-3 py-[6px]
-                       transition-colors duration-300"
+                       text-body/50 hover:text-cream px-4 py-2 min-h-[44px]
+                       flex items-center transition-colors duration-300"
           >
             Open in Maps →
           </a>

@@ -30,7 +30,7 @@ export default function Footer() {
             <p className="font-cormorant text-cream/80 text-xl font-light italic leading-snug max-w-[200px]">
               Where the sea<br />meets stillness.
             </p>
-            <p className="font-jost text-body/50 text-[9px] tracking-widest uppercase">
+            <p className="font-jost text-body/50 text-[10px] tracking-widest uppercase">
               A 13,000 sq. ft. private villa experience
             </p>
           </div>

@@ -124,7 +124,7 @@ export default function TestimonialsSection() {
           <button
             aria-label="Previous review"
             onClick={() => advance((current - 1 + REVIEWS.length) % REVIEWS.length)}
-            className="w-8 h-8 flex items-center justify-center border border-white/[0.1]
+            className="w-11 h-11 flex items-center justify-center border border-white/[0.1]
                        text-body/40 hover:text-cream hover:border-gold/40
                        transition-all duration-300 focus:outline-none"
           >
@@ -134,22 +134,27 @@ export default function TestimonialsSection() {
             </svg>
           </button>
 
-          {/* Dots */}
+          {/* Dots — wrapped in 44px tall touch target */}
           <div className="flex items-center gap-3">
             {REVIEWS.map((_, i) => (
               <button
                 key={i}
                 aria-label={`Review ${i + 1}`}
                 onClick={() => advance(i)}
-                className="h-px rounded-full transition-all duration-500 ease-out focus:outline-none"
-                style={{
-                  width: i === current ? "2rem" : "0.5rem",
-                  backgroundColor:
-                    i === current
-                      ? "rgba(184,151,106,0.7)"
-                      : "rgba(245,240,232,0.18)",
-                }}
-              />
+                className="h-11 flex items-center focus:outline-none"
+              >
+                <span
+                  className="block rounded-full transition-all duration-500 ease-out"
+                  style={{
+                    height: "1px",
+                    width: i === current ? "2rem" : "0.5rem",
+                    backgroundColor:
+                      i === current
+                        ? "rgba(184,151,106,0.7)"
+                        : "rgba(245,240,232,0.18)",
+                  }}
+                />
+              </button>
             ))}
           </div>
 
@@ -157,7 +162,7 @@ export default function TestimonialsSection() {
           <button
             aria-label="Next review"
             onClick={() => advance((current + 1) % REVIEWS.length)}
-            className="w-8 h-8 flex items-center justify-center border border-white/[0.1]
+            className="w-11 h-11 flex items-center justify-center border border-white/[0.1]
                        text-body/40 hover:text-cream hover:border-gold/40
                        transition-all duration-300 focus:outline-none"
           >

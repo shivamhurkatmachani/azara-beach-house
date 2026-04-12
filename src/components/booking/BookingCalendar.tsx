@@ -89,8 +89,8 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
         {/* Day name headers */}
         <div className="grid grid-cols-7 mb-1">
           {DAYS.map(d => (
-            <span key={d} className="font-jost text-body/30 text-[9px] tracking-wide
-                                     text-center h-7 flex items-center justify-center">
+            <span key={d} className="font-jost text-body/30 text-[10px] tracking-wide
+                                     text-center h-9 flex items-center justify-center">
               {d}
             </span>
           ))}
@@ -98,7 +98,7 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
         {/* Day cells */}
         <div className="grid grid-cols-7">
           {grid.map((date, i) => {
-            if (!date) return <div key={`pad-${i}`} className="h-8" />;
+            if (!date) return <div key={`pad-${i}`} className="h-10" />;
             const dis  = isDisabled(date);
             const ci   = isCheckIn(date);
             const co   = isCheckOut(date);
@@ -109,7 +109,7 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
               <div
                 key={toYMD(date)}
                 className={[
-                  "relative h-8 flex items-center justify-center",
+                  "relative h-10 flex items-center justify-center",
                   ir ? "bg-gold/[0.15]" : "",
                   // Flatten left edge on check-out
                   co ? "rounded-r-none" : "",
@@ -122,8 +122,8 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
                   onMouseEnter={() => !dis && setHover(date)}
                   onMouseLeave={() => setHover(null)}
                   className={[
-                    "relative z-10 w-8 h-8 flex items-center justify-center",
-                    "font-jost text-[12px] tracking-wide transition-all duration-150",
+                    "relative z-10 w-9 h-9 flex items-center justify-center",
+                    "font-jost text-[13px] tracking-wide transition-all duration-150",
                     /* Selected */
                     ci || co
                       ? "rounded-full bg-gold text-charcoal font-medium"
@@ -161,7 +161,7 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
         <button
           type="button"
           onClick={prevMonth}
-          className="w-7 h-7 flex items-center justify-center
+          className="w-11 h-11 flex items-center justify-center
                      text-body/40 hover:text-cream transition-colors"
           aria-label="Previous month"
         >
@@ -173,7 +173,7 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
         <button
           type="button"
           onClick={() => setLeftMonth(addMonths(leftMonth, 1))}
-          className="w-7 h-7 flex items-center justify-center
+          className="w-11 h-11 flex items-center justify-center
                      text-body/40 hover:text-cream transition-colors"
           aria-label="Next month"
         >

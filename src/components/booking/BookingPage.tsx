@@ -41,7 +41,7 @@ const VILLA_PHOTOS = [
 /* ─── Shared UI atoms ──────────────────────────────────────── */
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <p className="font-jost text-body/55 text-[9px] tracking-widest uppercase mb-2">
+    <p className="font-jost text-body/55 text-[10px] tracking-widest uppercase mb-2">
       {children}
     </p>
   );
@@ -67,17 +67,17 @@ function Counter({
       <div className="flex items-center gap-4">
         <button type="button" onClick={() => onChange(Math.max(min, value-1))}
           disabled={value <= min}
-          className="w-8 h-8 rounded-full border border-white/[0.1] flex items-center justify-center
+          className="w-11 h-11 rounded-full border border-white/[0.1] flex items-center justify-center
                      text-cream/50 hover:text-cream hover:border-gold/40 disabled:opacity-20
                      transition-all duration-200">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M5 12h14" />
           </svg>
         </button>
-        <span className="font-cormorant text-cream font-light text-xl w-6 text-center">{value}</span>
+        <span className="font-cormorant text-cream font-light text-xl w-8 text-center">{value}</span>
         <button type="button" onClick={() => onChange(Math.min(max, value+1))}
           disabled={value >= max}
-          className="w-8 h-8 rounded-full border border-white/[0.1] flex items-center justify-center
+          className="w-11 h-11 rounded-full border border-white/[0.1] flex items-center justify-center
                      text-cream/50 hover:text-cream hover:border-gold/40 disabled:opacity-20
                      transition-all duration-200">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -312,7 +312,7 @@ export default function BookingPage() {
           <div className="hidden sm:block w-px h-4 bg-white/[0.1] shrink-0" />
           {/* Check-in */}
           <div className="flex flex-col shrink-0">
-            <span className="font-jost text-body/35 text-[8px] tracking-widest uppercase">Check-in</span>
+            <span className="font-jost text-body/35 text-[10px] tracking-widest uppercase">Check-in</span>
             <span className="font-jost text-cream/70 text-[11px]">
               {checkIn ? fmtDate(checkIn) : "—"}
             </span>
@@ -320,7 +320,7 @@ export default function BookingPage() {
           <div className="w-px h-4 bg-white/[0.1] shrink-0" />
           {/* Check-out */}
           <div className="flex flex-col shrink-0">
-            <span className="font-jost text-body/35 text-[8px] tracking-widest uppercase">Check-out</span>
+            <span className="font-jost text-body/35 text-[10px] tracking-widest uppercase">Check-out</span>
             <span className="font-jost text-cream/70 text-[11px]">
               {checkOut ? fmtDate(checkOut) : "—"}
             </span>
@@ -328,7 +328,7 @@ export default function BookingPage() {
           <div className="w-px h-4 bg-white/[0.1] shrink-0" />
           {/* Guests */}
           <div className="flex flex-col shrink-0">
-            <span className="font-jost text-body/35 text-[8px] tracking-widest uppercase">Guests</span>
+            <span className="font-jost text-body/35 text-[10px] tracking-widest uppercase">Guests</span>
             <span className="font-jost text-cream/70 text-[11px]">
               {adults + children} total · {adults} adults
             </span>
@@ -897,7 +897,7 @@ export default function BookingPage() {
                   <div className="flex flex-col gap-5">
 
                     {/* Name */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FieldWrap>
                         <Label>First Name *</Label>
                         <input required placeholder="First" value={firstName}
@@ -923,10 +923,10 @@ export default function BookingPage() {
                       <div className="flex">
                         <select value={cc} onChange={e => setCC(e.target.value)}
                           className="bg-white/[0.03] border border-r-0 border-white/[0.2]
-                                     px-3 py-[13px] font-jost text-body/60 text-[12px]
+                                     px-2 py-[13px] font-jost text-body/60 text-[12px]
                                      focus:outline-none focus:border-gold/50 shrink-0
                                      transition-colors duration-300 cursor-pointer appearance-none"
-                          style={{ width: "110px" }}>
+                          style={{ width: "90px" }}>
                           {COUNTRY_CODES.map(c => (
                             <option key={c.v} value={c.v} className="bg-[#0A0A0A] text-cream">{c.l}</option>
                           ))}
@@ -989,7 +989,7 @@ export default function BookingPage() {
                                 </p>
                                 <div className="flex gap-5 mt-2">
                                   <div>
-                                    <p className="font-jost text-body/35 text-[8px] tracking-widest uppercase">
+                                    <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase">
                                       Pay now
                                     </p>
                                     <p className="font-jost text-gold text-[13px] mt-[1px]">
@@ -997,7 +997,7 @@ export default function BookingPage() {
                                     </p>
                                   </div>
                                   <div>
-                                    <p className="font-jost text-body/35 text-[8px] tracking-widest uppercase">
+                                    <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase">
                                       Pay later
                                     </p>
                                     <p className="font-jost text-cream/60 text-[13px] mt-[1px]">
@@ -1030,7 +1030,7 @@ export default function BookingPage() {
                           {/* Dates */}
                           <div className="flex justify-between">
                             <div>
-                              <p className="font-jost text-body/35 text-[8px] tracking-widest uppercase">Check-in</p>
+                              <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase">Check-in</p>
                               <p className="font-jost text-cream/70 text-[12px] mt-[2px]">{fmtDate(checkIn)}</p>
                             </div>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -1039,7 +1039,7 @@ export default function BookingPage() {
                               <path d="M9 18l6-6-6-6" />
                             </svg>
                             <div className="text-right">
-                              <p className="font-jost text-body/35 text-[8px] tracking-widest uppercase">Check-out</p>
+                              <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase">Check-out</p>
                               <p className="font-jost text-cream/70 text-[12px] mt-[2px]">{fmtDate(checkOut)}</p>
                             </div>
                           </div>

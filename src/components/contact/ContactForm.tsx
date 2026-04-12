@@ -37,7 +37,7 @@ const GUEST_OPTIONS = [
 /* ── Shared field label + wrapper ─────────────────────────── */
 function FieldLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="font-jost text-cream/70 text-[9px] tracking-widest uppercase mb-2">
+    <p className="font-jost text-cream/70 text-[10px] tracking-widest uppercase mb-2">
       {children}
     </p>
   );
@@ -179,7 +179,7 @@ export default function ContactForm() {
                     "focus:outline-none focus:border-gold/60 transition-colors duration-300",
                     "cursor-pointer shrink-0 appearance-none",
                   ].join(" ")}
-                  style={{ width: "90px" }}
+                  style={{ width: "80px" }}
                 >
                   {COUNTRY_CODES.map((c) => (
                     <option key={c.code} value={c.code}
@@ -257,7 +257,7 @@ export default function ContactForm() {
             </div>
 
             {/* Privacy note */}
-            <p className="font-jost text-body/28 text-[9px] tracking-wider leading-loose -mt-2">
+            <p className="font-jost text-body/28 text-[10px] tracking-wider leading-loose -mt-2">
               Your details are used solely to respond to your inquiry. We do not share
               or sell your information to third parties.
             </p>
@@ -267,7 +267,7 @@ export default function ContactForm() {
               type="submit"
               disabled={loading}
               className={[
-                "group relative overflow-hidden self-start",
+                "group relative overflow-hidden w-full sm:self-start sm:w-auto",
                 "border border-gold/50 px-10 py-[15px]",
                 "font-jost text-[11px] tracking-widest uppercase",
                 "transition-all duration-400",
