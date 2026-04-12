@@ -6,13 +6,15 @@ import Footer from "./Footer";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAdmin  = pathname?.startsWith("/admin");
+  const isAdmin = pathname?.startsWith("/admin");
+  const isV2    = pathname?.startsWith("/v2");
+  const showChrome = !isAdmin && !isV2;
 
   return (
     <>
-      {!isAdmin && <Navbar />}
+      {showChrome && <Navbar />}
       {children}
-      {!isAdmin && <Footer />}
+      {showChrome && <Footer />}
     </>
   );
 }
