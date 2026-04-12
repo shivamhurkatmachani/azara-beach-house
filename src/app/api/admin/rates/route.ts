@@ -6,7 +6,7 @@ export async function GET() {
   const authErr = requireAdminAuth();
   if (authErr) return authErr;
 
-  const rates = await prisma.seasonRate.findMany({ orderBy: { startMonth: "asc" } });
+  const rates = await prisma.seasonRate.findMany({ orderBy: { startDate: "asc" } });
   return NextResponse.json(rates);
 }
 
@@ -18,10 +18,8 @@ export async function POST(req: NextRequest) {
   const rate = await prisma.seasonRate.create({
     data: {
       name:        body.name,
-      startMonth:  Number(body.startMonth),
-      startDay:    Number(body.startDay),
-      endMonth:    Number(body.endMonth),
-      endDay:      Number(body.endDay),
+      startDate:   new Date(body.startDate),
+      endDate:     new Date(body.endDate),
       nightlyRate: Number(body.nightlyRate),
       isActive:    body.isActive ?? true,
     },
@@ -38,10 +36,8 @@ export async function PUT(req: NextRequest) {
     where: { id: body.id },
     data: {
       name:        body.name,
-      startMonth:  Number(body.startMonth),
-      startDay:    Number(body.startDay),
-      endMonth:    Number(body.endMonth),
-      endDay:      Number(body.endDay),
+      startDate:   new Date(body.startDate),
+      endDate:     new Date(body.endDate),
       nightlyRate: Number(body.nightlyRate),
       isActive:    Boolean(body.isActive),
     },

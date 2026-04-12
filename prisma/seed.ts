@@ -3,23 +3,9 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  /* ── Season rates ──────────────────────────────────────── */
-  const rates = [
-    { name: "Peak Season",          startMonth: 12, startDay: 1,  endMonth: 1,  endDay: 31, nightlyRate: 118750 },
-    { name: "High Season Oct–Nov",  startMonth: 10, startDay: 1,  endMonth: 11, endDay: 30, nightlyRate: 90000  },
-    { name: "High Season Feb",      startMonth: 2,  startDay: 1,  endMonth: 2,  endDay: 28, nightlyRate: 90000  },
-    { name: "Shoulder Mar",         startMonth: 3,  startDay: 1,  endMonth: 3,  endDay: 31, nightlyRate: 70000  },
-    { name: "Shoulder Sep",         startMonth: 9,  startDay: 1,  endMonth: 9,  endDay: 30, nightlyRate: 70000  },
-    { name: "Off-Peak Season",      startMonth: 4,  startDay: 1,  endMonth: 8,  endDay: 31, nightlyRate: 55000  },
-  ];
-
-  for (const r of rates) {
-    await prisma.seasonRate.upsert({
-      where:  { id: r.name },
-      update: r,
-      create: { id: r.name, ...r },
-    });
-  }
+  /* ── Season rates are intentionally left empty here.
+     The admin will enter them via the Rates panel with proper full dates.
+     ─────────────────────────────────────────────────────────────────── */
 
   /* ── Default policies ──────────────────────────────────── */
   const policies = [
@@ -52,7 +38,7 @@ async function main() {
     });
   }
 
-  console.log("✓ Database seeded with rates and policies.");
+  console.log("✓ Database seeded with policies.");
 }
 
 main()

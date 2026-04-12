@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const rates = await prisma.seasonRate.findMany({
       where:   { isActive: true },
-      orderBy: { startMonth: "asc" },
+      orderBy: { startDate: "asc" },
     });
     return NextResponse.json(rates, {
       headers: { "Cache-Control": "no-store, max-age=0" },

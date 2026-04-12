@@ -201,7 +201,12 @@ export default function BookingPage() {
   }
 
   function handleCheckAvailability() {
-    if (!checkIn || !checkOut || rangeHasBlocked) return;
+    if (!checkIn || !checkOut) return;
+    // Re-check: if any date in the selected range is blocked/booked, show an error
+    if (rangeHasBlocked) {
+      alert("One or more dates in your selected range are unavailable. Please choose different dates.");
+      return;
+    }
     setStep("villa");
     setTimeout(() => villaRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
   }

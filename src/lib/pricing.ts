@@ -10,10 +10,8 @@ export interface PricingBreakdown {
 export interface DBSeasonRate {
   id:          string;
   name:        string;
-  startMonth:  number;
-  startDay:    number;
-  endMonth:    number;
-  endDay:      number;
+  startDate:   string; // ISO date string (from JSON)
+  endDate:     string; // ISO date string (from JSON)
   nightlyRate: number;
   isActive:    boolean;
 }
@@ -29,28 +27,33 @@ export function getNightlyRate(date: Date): number {
 
 /**
  * Returns the nightly rate from the database season rates.
- * Uses (month * 100 + day) encoding to handle cross-year seasons (e.g. Dec–Jan).
+ * Compares the given date against startDate–endDate ranges stored in the DB.
+ * Logs the matched season name and rate for debugging.
  */
 export function getNightlyRateFromDB(date: Date, rates: DBSeasonRate[]): number {
-  const m   = date.getMonth() + 1;
-  const d   = date.getDate();
-  const val = m * 100 + d; // e.g. Dec 15 → 1215, Jan 5 → 105
+  const d = new Date(date);
+  d.setHours(12, 0, 0, 0); // noon — avoids any DST edge issues
 
   for (const rate of rates) {
-    const start = rate.startMonth * 100 + rate.startDay;
-    const end   = rate.endMonth   * 100 + rate.endDay;
+    const start = new Date(rate.startDate);
+    const end   = new Date(rate.endDate);
+    start.setHours(0,  0,  0, 0);
+    end.setHours(23, 59, 59, 999); // inclusive end date
 
-    if (start <= end) {
-      // Simple range: Apr 1 (401) → Aug 31 (831)
-      if (val >= start && val <= end) return rate.nightlyRate;
-    } else {
-      // Cross-year range: Dec 1 (1201) → Jan 31 (131)
-      if (val >= start || val <= end) return rate.nightlyRate;
+    if (d >= start && d <= end) {
+      console.log(
+        `[rates] ${date.toISOString().split("T")[0]} → matched "${rate.name}" @ ₹${rate.nightlyRate}`,
+      );
+      return rate.nightlyRate;
     }
   }
 
-  // Fallback to hardcoded rates
-  return getNightlyRate(date);
+  // No season matched — fall back to hardcoded rates
+  const fallback = getNightlyRate(date);
+  console.log(
+    `[rates] ${date.toISOString().split("T")[0]} → no DB season matched, fallback ₹${fallback}`,
+  );
+  return fallback;
 }
 
 export function calculatePricing(

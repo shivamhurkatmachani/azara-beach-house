@@ -42,10 +42,8 @@ model BlockedDate {
 model SeasonRate {
   id          String   @id @default(cuid())
   name        String
-  startMonth  Int
-  startDay    Int
-  endMonth    Int
-  endDay      Int
+  startDate   DateTime
+  endDate     DateTime
   nightlyRate Int
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
