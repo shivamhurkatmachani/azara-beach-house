@@ -6,7 +6,11 @@ export async function GET() {
   const authErr = requireAdminAuth();
   if (authErr) return authErr;
   const inquiries = await prisma.contactInquiry.findMany({
-    orderBy: { createdAt: "desc" },
+    orderBy: [
+      // popup leads (higher intent) surface first within each status group
+      { source: "desc" },   // "popup" > "contact_page" lexicographically
+      { createdAt: "desc" },
+    ],
   });
   return NextResponse.json(inquiries);
 }

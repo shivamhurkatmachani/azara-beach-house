@@ -77,4 +77,5 @@ model ContactInquiry {
   guests    String?
   message   String?
   status    String   @default("new")
+  source    String   @default("contact_page")
 }

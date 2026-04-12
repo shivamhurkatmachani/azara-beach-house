@@ -1,14 +1,16 @@
-import HeroSection       from "@/components/HeroSection";
-import USPStrip          from "@/components/USPStrip";
-import IntroSection      from "@/components/IntroSection";
-import ExperienceSection from "@/components/ExperienceSection";
+import HeroSection        from "@/components/HeroSection";
+import USPStrip           from "@/components/USPStrip";
+import IntroSection       from "@/components/IntroSection";
+import ExperienceSection  from "@/components/ExperienceSection";
 import RoomsPreviewSection from "@/components/RoomsPreviewSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
-import CTASection        from "@/components/CTASection";
+import CTASection         from "@/components/CTASection";
+import LeadCapturePopup   from "@/components/LeadCapturePopup";
 
 export default function Home() {
   return (
     <main className="bg-charcoal">
+      <LeadCapturePopup />
       <HeroSection />
       <USPStrip />
       <IntroSection />
