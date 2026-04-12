@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Booking {
+  id              String   @id @default(cuid())
+  ref             String   @unique
+  createdAt       DateTime @default(now())
+  checkIn         DateTime
+  checkOut        DateTime
+  nights          Int
+  adults          Int
+  children        Int      @default(0)
+  firstName       String
+  lastName        String
+  email           String
+  phone           String
+  gstNumber       String?
+  specialRequests String?
+  promoCode       String?
+  paymentOption   String
+  baseTotal       Int
+  gstAmount       Int
+  grandTotal      Int
+  status          String   @default("pending")
+  paidAmount      Int      @default(0)
+  adminNotes      String?
+}
+
+model BlockedDate {
+  id     String  @id @default(cuid())
+  date   String  @unique
+  reason String?
+}
+
+model SeasonRate {
+  id          String   @id @default(cuid())
+  name        String
+  startMonth  Int
+  startDay    Int
+  endMonth    Int
+  endDay      Int
+  nightlyRate Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model PromoCode {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  discount  Float
+  validFrom DateTime
+  validTo   DateTime
+  maxUses   Int
+  usedCount Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Policy {
+  key   String @id
+  value String
+}

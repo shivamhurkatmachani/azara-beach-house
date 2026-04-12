@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import path from "path";
-import fs from "fs";
+import { prisma } from "@/lib/prisma";
 
 function genRef(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -10,29 +9,42 @@ function genRef(): string {
 }
 
 export async function POST(req: Request) {
-  const booking = await req.json();
-  const filePath = path.join(process.cwd(), "data", "bookings.json");
+  const body = await req.json();
 
-  let data: { bookings: unknown[] } = { bookings: [] };
-  try {
-    data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-  } catch {
-    /* file missing — use default */
+  // If a promo code was used, increment its usedCount
+  if (body.promoCode) {
+    await prisma.promoCode.updateMany({
+      where: { code: body.promoCode.toUpperCase(), isActive: true },
+      data:  { usedCount: { increment: 1 } },
+    });
   }
 
-  const ref = genRef();
-  data.bookings.push({
-    ...booking,
-    ref,
-    createdAt: new Date().toISOString(),
+  const booking = await prisma.booking.create({
+    data: {
+      ref:             genRef(),
+      checkIn:         new Date(body.checkIn),
+      checkOut:        new Date(body.checkOut),
+      nights:          Number(body.nights),
+      adults:          Number(body.adults),
+      children:        Number(body.children ?? 0),
+      firstName:       body.firstName,
+      lastName:        body.lastName,
+      email:           body.email,
+      phone:           body.phone,
+      gstNumber:       body.gstNumber ?? null,
+      specialRequests: body.specialRequests ?? null,
+      promoCode:       body.promoCode ?? null,
+      paymentOption:   body.paymentOption,
+      baseTotal:       Number(body.baseTotal),
+      gstAmount:       Number(body.gstAmount),
+      grandTotal:      Number(body.grandTotal),
+    },
   });
 
-  fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-  return NextResponse.json({ ref });
+  return NextResponse.json({ ref: booking.ref });
 }
 
 export async function GET() {
-  const filePath = path.join(process.cwd(), "data", "bookings.json");
-  const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
-  return NextResponse.json(data);
+  const bookings = await prisma.booking.findMany({ orderBy: { createdAt: "desc" } });
+  return NextResponse.json({ bookings });
 }
