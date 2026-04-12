@@ -1,10 +1,11 @@
 export interface PricingBreakdown {
-  nights:    number;
-  baseTotal: number;
-  gstAmount: number;
-  grandTotal: number;
-  avgNightly: number;
-  halfPayNow: number;
+  nights:      number;
+  baseTotal:   number;
+  gstAmount:   number;
+  grandTotal:  number;
+  avgNightly:  number;
+  halfPayNow:  number;
+  rateUnavailable?: boolean; // true when DB rates are loaded but a night has no matching season
 }
 
 export interface DBSeasonRate {
@@ -28,32 +29,26 @@ export function getNightlyRate(date: Date): number {
 /**
  * Returns the nightly rate from the database season rates.
  * Compares the given date against startDate–endDate ranges stored in the DB.
- * Logs the matched season name and rate for debugging.
+ * Returns 0 if no season covers this date (caller treats 0 as "rate unavailable").
  */
 export function getNightlyRateFromDB(date: Date, rates: DBSeasonRate[]): number {
-  const d = new Date(date);
-  d.setHours(12, 0, 0, 0); // noon — avoids any DST edge issues
+  const dateStr = toYMD(date);
 
   for (const rate of rates) {
-    const start = new Date(rate.startDate);
-    const end   = new Date(rate.endDate);
-    start.setHours(0,  0,  0, 0);
-    end.setHours(23, 59, 59, 999); // inclusive end date
+    // Compare as YYYY-MM-DD strings — avoids all timezone issues.
+    // DB stores dates as UTC midnight; slice(0,10) gives the calendar date that was entered.
+    const startStr = rate.startDate.slice(0, 10);
+    const endStr   = rate.endDate.slice(0, 10);
 
-    if (d >= start && d <= end) {
-      console.log(
-        `[rates] ${date.toISOString().split("T")[0]} → matched "${rate.name}" @ ₹${rate.nightlyRate}`,
-      );
+    if (dateStr >= startStr && dateStr <= endStr) {
+      console.log(`[rates] ${dateStr} → matched "${rate.name}" @ ₹${rate.nightlyRate}`);
       return rate.nightlyRate;
     }
   }
 
-  // No season matched — fall back to hardcoded rates
-  const fallback = getNightlyRate(date);
-  console.log(
-    `[rates] ${date.toISOString().split("T")[0]} → no DB season matched, fallback ₹${fallback}`,
-  );
-  return fallback;
+  // No DB season covers this date — return 0 as a sentinel (do NOT fall back to hardcoded rates)
+  console.log(`[rates] ${dateStr} → no DB season matched — rate unavailable`);
+  return 0;
 }
 
 export function calculatePricing(
@@ -62,6 +57,7 @@ export function calculatePricing(
   dbRates?: DBSeasonRate[],
 ): PricingBreakdown {
   const nightRates: number[] = [];
+  const usingDB = dbRates && dbRates.length > 0;
   const cursor = new Date(checkIn);
   cursor.setHours(0, 0, 0, 0);
   const end = new Date(checkOut);
@@ -69,12 +65,15 @@ export function calculatePricing(
 
   while (cursor < end) {
     nightRates.push(
-      dbRates && dbRates.length > 0
-        ? getNightlyRateFromDB(cursor, dbRates)
+      usingDB
+        ? getNightlyRateFromDB(cursor, dbRates!)
         : getNightlyRate(cursor),
     );
     cursor.setDate(cursor.getDate() + 1);
   }
+
+  // If DB rates were loaded and any night returned 0, the range is not fully covered
+  const rateUnavailable = usingDB && nightRates.some((r) => r === 0);
 
   const baseTotal  = nightRates.reduce((s, r) => s + r, 0);
   const gstAmount  = Math.round(baseTotal * 0.18);
@@ -87,6 +86,7 @@ export function calculatePricing(
     grandTotal,
     avgNightly: nightRates.length ? Math.round(baseTotal / nightRates.length) : 0,
     halfPayNow: Math.round(grandTotal / 2),
+    rateUnavailable,
   };
 }
 
@@ -100,8 +100,16 @@ export function fmtDate(d: Date): string {
   });
 }
 
+/**
+ * Returns a local YYYY-MM-DD string (NOT UTC).
+ * Using toISOString() would shift dates back by one day in UTC+ timezones
+ * (e.g. IST midnight = previous day in UTC), causing calendar mismatches.
+ */
 export function toYMD(d: Date): string {
-  return d.toISOString().split("T")[0];
+  const y  = d.getFullYear();
+  const m  = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${dd}`;
 }
 
 /** Day difference between two dates (checkOut − checkIn). */

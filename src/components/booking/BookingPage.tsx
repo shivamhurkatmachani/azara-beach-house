@@ -238,7 +238,7 @@ export default function BookingPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!agreed || !pricing || !checkIn || !checkOut) return;
+    if (!agreed || !pricing || pricing.rateUnavailable || !checkIn || !checkOut) return;
     setSubmitting(true);
     setSubmitError(null);
     try {
@@ -330,9 +330,9 @@ export default function BookingPage() {
           {/* Spacer */}
           <div className="flex-1" />
           {/* Nights + price */}
-          {pricing && (
+          {pricing && !pricing.rateUnavailable && (
             <span className="font-jost text-gold text-[11px] tracking-wide whitespace-nowrap shrink-0">
-              {pricing.nights} nights · {formatINR(pricing.grandTotal)}
+              {pricing.nights} nights · {formatINR((discountedPricing ?? pricing).grandTotal)}
             </span>
           )}
         </div>
@@ -439,19 +439,24 @@ export default function BookingPage() {
               <motion.button
                 type="button"
                 onClick={handleCheckAvailability}
-                disabled={!checkIn || !checkOut || rangeHasBlocked}
+                disabled={!checkIn || !checkOut || rangeHasBlocked || !!pricing?.rateUnavailable}
                 className={[
                   "w-full py-[15px] font-jost text-[11px] tracking-widest uppercase",
                   "border transition-all duration-300",
-                  checkIn && checkOut && !rangeHasBlocked
+                  checkIn && checkOut && !rangeHasBlocked && !pricing?.rateUnavailable
                     ? "border-gold text-cream bg-gold/[0.08] hover:bg-gold/[0.14] cursor-pointer"
                     : "border-white/[0.07] text-body/30 cursor-not-allowed",
                 ].join(" ")}
-                whileHover={checkIn && checkOut ? { scale: 1.005 } : {}}
+                whileHover={checkIn && checkOut && !pricing?.rateUnavailable ? { scale: 1.005 } : {}}
                 transition={{ duration: 0.15 }}
               >
-                Check Availability
-                {(discountedPricing ?? pricing) && ` — ${formatINR((discountedPricing ?? pricing)!.grandTotal)} total`}
+                {pricing?.rateUnavailable
+                  ? "Rate unavailable for selected dates — contact us"
+                  : <>
+                      Check Availability
+                      {(discountedPricing ?? pricing) && !pricing?.rateUnavailable && ` — ${formatINR((discountedPricing ?? pricing)!.grandTotal)} total`}
+                    </>
+                }
               </motion.button>
             </div>
 
@@ -604,7 +609,23 @@ export default function BookingPage() {
 
                   {/* Pricing */}
                   <div className="px-6 py-7 flex flex-col gap-2 justify-center">
-                    {pricing ? (
+                    {pricing?.rateUnavailable ? (
+                      <div className="flex flex-col gap-3">
+                        <p className="font-jost text-amber-400/80 text-[11px] tracking-[0.03em] leading-relaxed">
+                          Rate not available for these dates. Please contact us directly.
+                        </p>
+                        <a
+                          href="https://wa.me/919090407408"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-jost text-[10px] tracking-widest uppercase
+                                     border border-gold/40 text-gold/80 px-4 py-2 text-center
+                                     hover:bg-gold/[0.08] transition-colors duration-200"
+                        >
+                          WhatsApp Us →
+                        </a>
+                      </div>
+                    ) : pricing ? (
                       <>
                         <p className="font-jost text-body/35 text-[9px] tracking-widest uppercase">
                           Avg. per night
@@ -681,6 +702,12 @@ export default function BookingPage() {
                             <p className="font-jost text-body/35 text-[9px] tracking-widest uppercase mb-3">
                               Tariff Inclusive of Breakfast
                             </p>
+                            {pricing?.rateUnavailable ? (
+                              <p className="font-jost text-amber-400/80 text-[11px] tracking-[0.03em] leading-relaxed py-4">
+                                No season rate is configured for part or all of your selected dates.
+                                Please contact us on WhatsApp for a custom quote.
+                              </p>
+                            ) : (
                             <div className="flex flex-col divide-y divide-white/[0.05]">
                               {pricing && (() => {
                                 const dp = discountedPricing;
@@ -702,6 +729,7 @@ export default function BookingPage() {
                                 ));
                               })()}
                             </div>
+                            )}
 
                             {/* Inclusions */}
                             <div className="mt-5 pt-5 border-t border-white/[0.06]">
@@ -737,16 +765,30 @@ export default function BookingPage() {
 
                           {/* Book now panel */}
                           <div className="flex flex-col gap-4 md:w-[220px] shrink-0">
-                            <button
-                              type="button"
-                              onClick={handleSelectVilla}
-                              className="w-full border border-gold/50 bg-gold/[0.08] py-4
-                                         font-jost text-[11px] tracking-widest uppercase text-cream
-                                         hover:bg-gold/[0.14] hover:border-gold transition-all duration-300"
-                            >
-                              Book Now →
-                            </button>
-                            {pricing && (
+                            {pricing?.rateUnavailable ? (
+                              <a
+                                href="https://wa.me/919090407408"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full border border-gold/40 bg-gold/[0.05] py-4
+                                           font-jost text-[11px] tracking-widest uppercase text-gold/80
+                                           hover:bg-gold/[0.12] hover:border-gold transition-all duration-300
+                                           text-center"
+                              >
+                                Contact Us →
+                              </a>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={handleSelectVilla}
+                                className="w-full border border-gold/50 bg-gold/[0.08] py-4
+                                           font-jost text-[11px] tracking-widest uppercase text-cream
+                                           hover:bg-gold/[0.14] hover:border-gold transition-all duration-300"
+                              >
+                                Book Now →
+                              </button>
+                            )}
+                            {pricing && !pricing.rateUnavailable && (
                               <p className="font-jost text-body/35 text-[9px] tracking-wider
                                             text-center leading-loose">
                                 {formatINR((discountedPricing ?? pricing).grandTotal)} total for{" "}
