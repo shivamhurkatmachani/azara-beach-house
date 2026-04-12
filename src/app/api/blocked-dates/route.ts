@@ -1,6 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic   = "force-dynamic";
+export const revalidate = 0;
+
+const NO_CACHE_HEADERS = {
+  "Cache-Control":        "no-store, no-cache, must-revalidate, max-age=0",
+  "CDN-Cache-Control":    "no-store",
+  "Vercel-CDN-Cache-Control": "no-store",
+};
+
 export async function GET() {
   const [blockedRows, bookings] = await Promise.all([
     prisma.blockedDate.findMany({ select: { date: true } }),
@@ -18,7 +27,7 @@ export async function GET() {
     cursor.setHours(0, 0, 0, 0);
     const end = new Date(b.checkOut);
     end.setHours(0, 0, 0, 0);
-    // Block all nights (check-in inclusive, check-out exclusive — guests leave that morning)
+    // Block all nights (check-in inclusive, check-out exclusive)
     while (cursor < end) {
       blocked.add(cursor.toISOString().split("T")[0]);
       cursor.setDate(cursor.getDate() + 1);
@@ -27,6 +36,6 @@ export async function GET() {
 
   return NextResponse.json(
     { blocked: Array.from(blocked) },
-    { headers: { "Cache-Control": "no-store, max-age=0" } },
+    { headers: NO_CACHE_HEADERS },
   );
 }

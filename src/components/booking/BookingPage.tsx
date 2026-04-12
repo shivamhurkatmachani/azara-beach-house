@@ -147,7 +147,10 @@ export default function BookingPage() {
 
   /* ── Fetch blocked dates ──────────────────────────────── */
   useEffect(() => {
-    fetch("/api/blocked-dates")
+    fetch(`/api/blocked-dates?t=${Date.now()}`, {
+      cache: "no-store",
+      headers: { "Cache-Control": "no-cache" },
+    })
       .then(r => r.json())
       .then(d => setBlocked(d.blocked ?? []))
       .catch(() => {});
@@ -155,7 +158,10 @@ export default function BookingPage() {
 
   /* ── Fetch season rates from DB ───────────────────────── */
   useEffect(() => {
-    fetch(`/api/rates?t=${Date.now()}`, { cache: "no-store" })
+    fetch(`/api/rates?t=${Date.now()}`, {
+      cache: "no-store",
+      headers: { "Cache-Control": "no-cache" },
+    })
       .then(r => r.json())
       .then(d => {
         console.log("[rates]", d);
