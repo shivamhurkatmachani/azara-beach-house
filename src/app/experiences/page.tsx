@@ -38,9 +38,8 @@ interface Activity {
   desc: string;
   vibe: Vibe;
   duration: string;
-  distance: string;
-  image?: string;          // Unsplash direct URL
-  gradient: string;        // fallback / overlay tint
+  image: string;
+  gradient: string;        // overlay tint
 }
 
 const VIBE_COLOR: Record<Vibe, string> = {
@@ -56,32 +55,35 @@ const WATER: Activity[] = [
   {
     name: "Private Yacht Charter",
     desc: "Sail the Goan coastline at sunset with a private crew, champagne, and panoramic views of Fort Aguada",
-    vibe: "Romance", duration: "4–6 hours", distance: "15 min",
+    vibe: "Romance", duration: "4–6 hours",
     image: "https://images.unsplash.com/photo-1567899378494-47b22a2ae96a?w=900&q=80",
     gradient: "from-slate-900 via-blue-950 to-slate-900",
   },
   {
     name: "Deep Sea Fishing",
     desc: "Head offshore with experienced fishermen for a catch of kingfish, barracuda, and red snapper",
-    vibe: "Adventure", duration: "Full day", distance: "20 min",
+    vibe: "Adventure", duration: "Full day",
+    image: "https://images.unsplash.com/photo-1606820854416-439b3305ff39?w=800&q=80",
     gradient: "from-blue-950 via-teal-950 to-blue-950",
   },
   {
     name: "Jet Skiing & Parasailing",
     desc: "Feel the rush at Candolim and Calangute beaches with world-class water sports",
-    vibe: "Adventure", duration: "2–3 hours", distance: "5 min",
+    vibe: "Adventure", duration: "2–3 hours",
+    image: "https://images.unsplash.com/photo-1626038225708-050e4eb7bca3?w=800&q=80",
     gradient: "from-cyan-950 via-blue-900 to-cyan-950",
   },
   {
     name: "Kayaking & Paddleboarding",
     desc: "Explore the calm backwaters of the Nerul River at your own pace",
-    vibe: "Relaxation", duration: "Half day", distance: "30 min",
+    vibe: "Relaxation", duration: "Half day",
+    image: "https://images.unsplash.com/photo-1604715892639-f0afaf080f47?w=800&q=80",
     gradient: "from-teal-950 via-emerald-950 to-teal-950",
   },
   {
     name: "Scuba Diving",
     desc: "Discover Goa's underwater world at Grande Island with certified PADI instructors",
-    vibe: "Adventure", duration: "Full day", distance: "45 min",
+    vibe: "Adventure", duration: "Full day",
     image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=900&q=80",
     gradient: "from-blue-950 via-indigo-950 to-blue-950",
   },
@@ -92,13 +94,14 @@ const SKY: Activity[] = [
   {
     name: "Paragliding at Arambol",
     desc: "Soar above the cliffs of North Goa with tandem paragliding over the Arabian Sea",
-    vibe: "Adventure", duration: "2–3 hours", distance: "1 hour",
+    vibe: "Adventure", duration: "2–3 hours",
+    image: "https://images.unsplash.com/photo-1697653377498-96153af9a80f?w=800&q=80",
     gradient: "from-indigo-950 via-purple-950 to-blue-950",
   },
   {
     name: "Hot Air Balloon Rides",
     desc: "A bird's eye view of Goa's lush green landscapes at sunrise",
-    vibe: "Romance", duration: "3–4 hours", distance: "45 min",
+    vibe: "Romance", duration: "3–4 hours",
     image: "https://images.unsplash.com/photo-1507608616759-54f48f0af0ee?w=900&q=80",
     gradient: "from-orange-950 via-amber-900 to-orange-950",
   },
@@ -109,32 +112,35 @@ const LAND: Activity[] = [
   {
     name: "Luxury Casino Experience",
     desc: "Try your luck at Goa's premium floating casinos including Grand 7 Casino, minutes from Azara",
-    vibe: "Romance", duration: "Evening", distance: "10 min",
+    vibe: "Romance", duration: "Evening",
     image: "https://images.unsplash.com/photo-1596838132731-3301c3fd4317?w=900&q=80",
     gradient: "from-rose-950 via-red-950 to-rose-950",
   },
   {
     name: "Old Goa Heritage Walk",
     desc: "Explore UNESCO World Heritage basilicas and 16th-century Portuguese architecture",
-    vibe: "Culture", duration: "Half day", distance: "20 min",
+    vibe: "Culture", duration: "Half day",
+    image: "https://images.unsplash.com/photo-1593693397690-362cb9666fc2?w=800&q=80",
     gradient: "from-amber-950 via-orange-950 to-yellow-950",
   },
   {
     name: "Dudhsagar Waterfall Trek",
     desc: "A jeep safari through the jungle to one of India's tallest waterfalls",
-    vibe: "Adventure", duration: "Full day", distance: "2 hours",
+    vibe: "Adventure", duration: "Full day",
+    image: "https://images.unsplash.com/photo-1670758304929-7e637819e6e7?w=800&q=80",
     gradient: "from-emerald-950 via-green-900 to-emerald-950",
   },
   {
     name: "Night Market & Flea Markets",
     desc: "Arpora Saturday Night Market and Anjuna Flea Market for local crafts, food, and live music",
-    vibe: "Culture", duration: "Evening", distance: "20 min",
+    vibe: "Culture", duration: "Evening",
+    image: "https://images.unsplash.com/photo-1555448248-2571daf6344b?w=800&q=80",
     gradient: "from-amber-900 via-orange-900 to-amber-950",
   },
   {
     name: "Guided Cycling Tour",
     desc: "Ride through Goa's charming villages, paddy fields, and Latin Quarter of Fontainhas",
-    vibe: "Culture", duration: "Half day", distance: "5 min",
+    vibe: "Culture", duration: "Half day",
     image: "https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=900&q=80",
     gradient: "from-green-950 via-teal-950 to-green-950",
   },
@@ -145,26 +151,29 @@ const DINE: Activity[] = [
   {
     name: "Beach Shack Hopping",
     desc: "From Britto's to Thalassa, experience Goa's legendary beachside dining",
-    vibe: "Relaxation", duration: "Half day", distance: "5 min",
+    vibe: "Relaxation", duration: "Half day",
+    image: "https://images.unsplash.com/photo-1600869798574-4a5a6640a5b1?w=800&q=80",
     gradient: "from-amber-900 via-yellow-900 to-orange-950",
   },
   {
     name: "Wine & Cocktail Tasting",
     desc: "Private tasting sessions at Goa's emerging wineries and craft cocktail bars",
-    vibe: "Romance", duration: "2–3 hours", distance: "30 min",
+    vibe: "Romance", duration: "2–3 hours",
     image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=900&q=80",
     gradient: "from-red-950 via-rose-900 to-red-950",
   },
   {
     name: "Sunset Cruise on the Mandovi",
     desc: "An evening cruise with live music, dinner, and views of Panaji's riverfront",
-    vibe: "Romance", duration: "3–4 hours", distance: "20 min",
+    vibe: "Romance", duration: "3–4 hours",
+    image: "https://images.unsplash.com/photo-1500514966906-fe245eea9344?w=800&q=80",
     gradient: "from-orange-950 via-red-900 to-purple-950",
   },
   {
     name: "Private Beach Bonfire",
     desc: "Arranged exclusively for Azara guests on a secluded stretch of Candolim Beach",
-    vibe: "Romance", duration: "2–3 hours", distance: "5 min",
+    vibe: "Romance", duration: "2–3 hours",
+    image: "https://images.unsplash.com/photo-1475483768296-6163e8f6fcf4?w=800&q=80",
     gradient: "from-red-950 via-orange-900 to-amber-950",
   },
 ];
@@ -199,23 +208,16 @@ function ActivityCard({
           "hover:shadow-[0_8px_40px_rgba(184,151,106,0.18)]",
         ].join(" ")}
       >
-        {/* Background — image or gradient */}
-        {activity.image ? (
-          <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
-            <Image
-              src={activity.image}
-              alt={activity.name}
-              fill
-              className="object-cover object-center"
-              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
-            />
-          </div>
-        ) : (
-          <div
-            className={`absolute inset-0 bg-gradient-to-br ${activity.gradient}
-                         transition-transform duration-700 ease-out group-hover:scale-[1.04]`}
+        {/* Background — image with gradient overlay */}
+        <div className="absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-[1.04]">
+          <Image
+            src={activity.image}
+            alt={activity.name}
+            fill
+            className="object-cover object-center"
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
           />
-        )}
+        </div>
 
         {/* Overlay — always dark at bottom for text */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/10
@@ -254,8 +256,6 @@ function ActivityCard({
             {/* Meta strip */}
             <div className="flex items-center gap-4 pt-1 border-t border-white/[0.08] mt-1">
               <MetaPill icon="clock" label={activity.duration} />
-              <div className="w-px h-3 bg-white/[0.12]" />
-              <MetaPill icon="map" label={activity.distance} />
             </div>
           </div>
         </div>
@@ -578,31 +578,24 @@ export default function ExperiencesPage() {
 
         <div className="relative z-10 max-w-3xl mx-auto flex flex-col items-center text-center gap-7">
           <FadeUp>
-            <p className="font-jost text-[9px] tracking-[0.3em] uppercase" style={{ color: `${GOLD}99` }}>
-              Concierge Services
-            </p>
-          </FadeUp>
-
-          <FadeUp delay={0.1}>
             <h2 className="font-cormorant font-light text-cream leading-[1.06] tracking-[0.06em]
                            text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem]">
-              Let Us Plan It<br />
-              <em className="not-italic text-cream/65">For You</em>
+              Goa Is Calling
             </h2>
           </FadeUp>
 
-          <FadeUp delay={0.18}>
+          <FadeUp delay={0.1}>
             <div className="h-px w-10 bg-gold/30" />
           </FadeUp>
 
-          <FadeUp delay={0.22}>
+          <FadeUp delay={0.18}>
             <p className="font-jost text-body/55 text-sm tracking-[0.06em] leading-loose max-w-md">
-              Our concierge team arranges everything — transport, bookings, private guides.
-              Just say the word.
+              From sunlit shores to starlit skies — the perfect Goan adventure begins at
+              your doorstep. Come, discover a new routine.
             </p>
           </FadeUp>
 
-          <FadeUp delay={0.3}>
+          <FadeUp delay={0.28}>
             <div className="flex flex-col sm:flex-row items-center gap-4 mt-2">
               <a
                 href="https://wa.me/919090407408"
@@ -626,7 +619,7 @@ export default function ExperiencesPage() {
                            border text-cream hover:bg-gold/[0.08] hover:border-gold"
                 style={{ borderColor: `${GOLD}50` }}
               >
-                Check Availability
+                Book Your Stay
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                   <path d="M9 18l6-6-6-6" />
