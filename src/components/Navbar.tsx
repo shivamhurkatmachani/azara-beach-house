@@ -31,15 +31,7 @@ const menuItemVariants: Variants = {
 };
 
 export default function Navbar() {
-  const [scrolled, setScrolled]   = useState(false);
-  const [menuOpen, setMenuOpen]   = useState(false);
-
-  /* Scroll detection */
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 60);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   /* Lock body scroll when mobile menu is open */
   useEffect(() => {
@@ -58,9 +50,7 @@ export default function Navbar() {
           "px-8 md:px-14 lg:px-20",
           "h-[76px] flex items-center justify-between",
           "transition-all duration-500 ease-in-out",
-          scrolled
-            ? "bg-charcoal/95 backdrop-blur-xl border-b border-white/[0.04]"
-            : "bg-transparent",
+          "bg-charcoal/95 backdrop-blur-xl border-b border-white/[0.04]",
         ].join(" ")}
       >
         {/* Logo */}
