@@ -1,23 +1,27 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "framer-motion";
 
 export default function HeroSection() {
   return (
     <section className="relative h-screen overflow-hidden">
 
-      {/* ── Ken Burns image ──────────────────────────────────── */}
-      <div className="absolute inset-0 ken-burns">
-        <Image
-          src="/images/Pool_1.jpg"
-          alt="Azara Beach House — infinity pool at dusk"
-          fill
-          priority
-          className="object-cover object-center"
-          sizes="100vw"
-        />
-      </div>
+      {/* ── Fullscreen video background ──────────────────────── */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover object-center"
+      >
+        <source src="/images/Azara_Hero_Video.mp4" type="video/mp4" />
+      </video>
+
+      {/* ── Semi-transparent dark overlay ────────────────────── */}
+      <div
+        className="absolute inset-0"
+        style={{ backgroundColor: "rgba(0,0,0,0.35)" }}
+      />
 
       {/* ── Gradient layering ────────────────────────────────── */}
       {/* Top: darkens sky so logo & navbar read clearly */}
