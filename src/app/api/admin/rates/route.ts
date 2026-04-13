@@ -17,11 +17,12 @@ export async function POST(req: NextRequest) {
   const body = await req.json();
   const rate = await prisma.seasonRate.create({
     data: {
-      name:        body.name,
-      startDate:   new Date(body.startDate),
-      endDate:     new Date(body.endDate),
-      nightlyRate: Number(body.nightlyRate),
-      isActive:    body.isActive ?? true,
+      name:            body.name,
+      startDate:       new Date(body.startDate),
+      endDate:         new Date(body.endDate),
+      nightlyRate:     Number(body.nightlyRate),
+      displayDiscount: Number(body.displayDiscount ?? 0),
+      isActive:        body.isActive ?? true,
     },
   });
   return NextResponse.json(rate);
@@ -35,11 +36,12 @@ export async function PUT(req: NextRequest) {
   const rate = await prisma.seasonRate.update({
     where: { id: body.id },
     data: {
-      name:        body.name,
-      startDate:   new Date(body.startDate),
-      endDate:     new Date(body.endDate),
-      nightlyRate: Number(body.nightlyRate),
-      isActive:    Boolean(body.isActive),
+      name:            body.name,
+      startDate:       new Date(body.startDate),
+      endDate:         new Date(body.endDate),
+      nightlyRate:     Number(body.nightlyRate),
+      displayDiscount: Number(body.displayDiscount ?? 0),
+      isActive:        Boolean(body.isActive),
     },
   });
   return NextResponse.json(rate);

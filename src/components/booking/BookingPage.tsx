@@ -337,9 +337,22 @@ export default function BookingPage() {
           <div className="flex-1" />
           {/* Nights + price */}
           {pricing && !pricing.rateUnavailable && (
-            <span className="font-jost text-gold text-[11px] tracking-wide whitespace-nowrap shrink-0">
-              {pricing.nights} nights · {formatINR((discountedPricing ?? pricing).grandTotal)}
-            </span>
+            <div className="flex items-center gap-2 shrink-0">
+              {pricing.displayDiscount > 0 && (
+                <span className="font-jost text-body/40 text-[10px] line-through whitespace-nowrap">
+                  {formatINR(pricing.rackGrandTotal)}
+                </span>
+              )}
+              <span className="font-jost text-gold text-[11px] tracking-wide whitespace-nowrap">
+                {pricing.nights} nights · {formatINR((discountedPricing ?? pricing).grandTotal)}
+              </span>
+              {pricing.displayDiscount > 0 && (
+                <span className="font-jost text-[9px] tracking-wider text-amber-400 border border-amber-400/30
+                                 bg-amber-400/10 px-1.5 py-[2px] whitespace-nowrap">
+                  {pricing.displayDiscount}% OFF
+                </span>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -460,7 +473,15 @@ export default function BookingPage() {
                   ? "Rate unavailable for selected dates — contact us"
                   : <>
                       Check Availability
-                      {(discountedPricing ?? pricing) && !pricing?.rateUnavailable && ` — ${formatINR((discountedPricing ?? pricing)!.grandTotal)} total`}
+                      {(discountedPricing ?? pricing) && !pricing?.rateUnavailable && (
+                        <span className="inline-flex items-center gap-2">
+                          <span> — </span>
+                          {pricing!.displayDiscount > 0 && (
+                            <span className="line-through text-body/40">{formatINR(pricing!.rackGrandTotal)}</span>
+                          )}
+                          <span>{formatINR((discountedPricing ?? pricing)!.grandTotal)} total</span>
+                        </span>
+                      )}
                     </>
                 }
               </motion.button>
@@ -633,20 +654,37 @@ export default function BookingPage() {
                       </div>
                     ) : pricing ? (
                       <>
+                        {pricing.displayDiscount > 0 && (
+                          <span className="inline-block font-jost text-[9px] tracking-widest uppercase
+                                           border border-amber-400/40 text-amber-400 bg-amber-400/10
+                                           px-2 py-[3px] mb-2">
+                            {pricing.displayDiscount}% OFF — Direct Booking Offer
+                          </span>
+                        )}
                         <p className="font-jost text-body/35 text-[9px] tracking-widest uppercase">
                           Avg. per night
                         </p>
+                        {pricing.displayDiscount > 0 && (
+                          <p className="font-jost text-body/35 text-[11px] line-through leading-none">
+                            {formatINR(Math.round(pricing.rackAvgNightly * 1.18))}
+                          </p>
+                        )}
                         <p className="font-cormorant text-cream font-light text-3xl
                                        tracking-[0.02em] italic leading-none">
-                          {formatINR(pricing.avgNightly)}
+                          {formatINR(Math.round(pricing.avgNightly * 1.18))}
                         </p>
                         <p className="font-jost text-body/40 text-[10px] tracking-[0.03em]">
-                          +{formatINR(Math.round(pricing.avgNightly * 0.18))} GST/night
+                          incl. GST/night
                         </p>
                         <div className="mt-3 pt-3 border-t border-white/[0.06]">
                           <p className="font-jost text-body/35 text-[9px] tracking-widest uppercase mb-1">
                             Total · {pricing.nights} night{pricing.nights !== 1 ? "s" : ""}
                           </p>
+                          {pricing.displayDiscount > 0 && (
+                            <p className="font-jost text-body/35 text-[11px] line-through leading-none mb-0.5">
+                              {formatINR(pricing.rackGrandTotal)}
+                            </p>
+                          )}
                           <p className="font-cormorant text-gold font-light text-2xl
                                          italic leading-none">
                             {formatINR((discountedPricing ?? pricing).grandTotal)}
@@ -716,23 +754,87 @@ export default function BookingPage() {
                             ) : (
                             <div className="flex flex-col divide-y divide-white/[0.05]">
                               {pricing && (() => {
-                                const dp = discountedPricing;
-                                const rows: [string, string, boolean?][] = [
-                                  ["Base rate", formatINR(pricing.baseTotal)],
-                                  ...(dp ? [["Discount (" + promoApplied!.discount + "%)", "−" + formatINR(dp.discountAmount), true] as [string, string, boolean]] : []),
-                                  ["GST (18%)", formatINR(dp ? dp.gstAmount : pricing.gstAmount)],
-                                  ["Grand total", formatINR(dp ? dp.grandTotal : pricing.grandTotal)],
-                                ];
-                                return rows.map(([label, val, isDiscount]) => (
-                                  <div key={label}
-                                    className={[
-                                      "flex justify-between py-3",
-                                      label === "Grand total" ? "font-medium text-cream" : isDiscount ? "text-emerald-400/80" : "text-body/60",
-                                    ].join(" ")}>
-                                    <span className="font-jost text-[12px] tracking-[0.02em]">{label}</span>
-                                    <span className={["font-jost text-[13px]", label === "Grand total" ? "text-gold" : ""].join(" ")}>{val}</span>
-                                  </div>
-                                ));
+                                const dp   = discountedPricing;
+                                const disc = pricing.displayDiscount;
+                                // Final effective base and totals
+                                const finalBase   = dp ? dp.discountedBase : pricing.baseTotal;
+                                const finalGst    = dp ? dp.gstAmount      : pricing.gstAmount;
+                                const finalTotal  = dp ? dp.grandTotal      : pricing.grandTotal;
+
+                                return (
+                                  <>
+                                    {/* Rack Rate row — only shown when display discount active */}
+                                    {disc > 0 && (
+                                      <div className="flex justify-between py-3 text-body/40">
+                                        <span className="font-jost text-[12px] tracking-[0.02em]">
+                                          Rack Rate · {pricing.nights} night{pricing.nights !== 1 ? "s" : ""}
+                                        </span>
+                                        <span className="font-jost text-[13px] line-through">
+                                          {formatINR(pricing.rackTotal)}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {/* Display discount row */}
+                                    {disc > 0 && (
+                                      <div className="flex justify-between py-3 text-amber-400/80">
+                                        <span className="font-jost text-[12px] tracking-[0.02em]">
+                                          Direct Booking Discount ({disc}%)
+                                        </span>
+                                        <span className="font-jost text-[13px]">
+                                          −{formatINR(pricing.savedAmount)}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {/* Your Rate / Base rate */}
+                                    <div className="flex justify-between py-3 text-body/60">
+                                      <span className="font-jost text-[12px] tracking-[0.02em]">
+                                        {disc > 0 ? "Your Rate" : "Base rate"} · {pricing.nights} night{pricing.nights !== 1 ? "s" : ""}
+                                      </span>
+                                      <span className={["font-jost text-[13px]", disc > 0 ? "text-gold" : ""].join(" ")}>
+                                        {formatINR(pricing.baseTotal)}
+                                      </span>
+                                    </div>
+                                    {/* You Save row */}
+                                    {disc > 0 && (
+                                      <div className="flex justify-between py-2 text-emerald-400/70">
+                                        <span className="font-jost text-[11px] tracking-[0.02em] italic">
+                                          You save
+                                        </span>
+                                        <span className="font-jost text-[11px] italic">
+                                          {formatINR(pricing.savedAmount)} on base
+                                        </span>
+                                      </div>
+                                    )}
+                                    {/* Promo code row */}
+                                    {dp && (
+                                      <div className="flex justify-between py-3 text-emerald-400/80">
+                                        <span className="font-jost text-[12px] tracking-[0.02em]">
+                                          Promo Code ({promoApplied!.discount}%)
+                                        </span>
+                                        <span className="font-jost text-[13px]">
+                                          −{formatINR(dp.discountAmount)}
+                                        </span>
+                                      </div>
+                                    )}
+                                    {/* Sub total (nights × your rate, after all discounts) */}
+                                    {(disc > 0 || dp) && (
+                                      <div className="flex justify-between py-3 text-body/60">
+                                        <span className="font-jost text-[12px] tracking-[0.02em]">Sub Total</span>
+                                        <span className="font-jost text-[13px]">{formatINR(finalBase)}</span>
+                                      </div>
+                                    )}
+                                    {/* GST */}
+                                    <div className="flex justify-between py-3 text-body/60">
+                                      <span className="font-jost text-[12px] tracking-[0.02em]">GST (18%)</span>
+                                      <span className="font-jost text-[13px]">{formatINR(finalGst)}</span>
+                                    </div>
+                                    {/* Grand total */}
+                                    <div className="flex justify-between py-3 font-medium text-cream">
+                                      <span className="font-jost text-[12px] tracking-[0.02em]">Grand Total</span>
+                                      <span className="font-jost text-[13px] text-gold">{formatINR(finalTotal)}</span>
+                                    </div>
+                                  </>
+                                );
                               })()}
                             </div>
                             )}
@@ -1056,25 +1158,45 @@ export default function BookingPage() {
                           </div>
 
                           {/* Room breakdown */}
+                          {pricing.displayDiscount > 0 && (
+                            <div className="flex justify-between">
+                              <span className="font-jost text-body/40 text-[11px] line-through">
+                                Rack Rate · {pricing.nights} night{pricing.nights !== 1 ? "s" : ""}
+                              </span>
+                              <span className="font-jost text-body/40 text-[11px] line-through">
+                                {formatINR(pricing.rackTotal)}
+                              </span>
+                            </div>
+                          )}
                           <div className="flex justify-between">
                             <span className="font-jost text-body/50 text-[11px]">
-                              Villa · {pricing.nights} night{pricing.nights !== 1 ? "s" : ""}
+                              {pricing.displayDiscount > 0 ? `Your Rate (${pricing.displayDiscount}% off)` : `Villa · ${pricing.nights} night${pricing.nights !== 1 ? "s" : ""}`}
                             </span>
-                            <span className="font-jost text-cream/70 text-[11px]">
+                            <span className={["font-jost text-[11px]", pricing.displayDiscount > 0 ? "text-gold" : "text-cream/70"].join(" ")}>
                               {formatINR(pricing.baseTotal)}
                             </span>
                           </div>
+                          {discountedPricing && (
+                            <div className="flex justify-between">
+                              <span className="font-jost text-emerald-400/70 text-[11px]">
+                                Promo ({promoApplied!.discount}% off)
+                              </span>
+                              <span className="font-jost text-emerald-400/70 text-[11px]">
+                                −{formatINR(discountedPricing.discountAmount)}
+                              </span>
+                            </div>
+                          )}
 
                           <div className="h-px bg-white/[0.05]" />
 
                           {/* Subtotal */}
                           <div className="flex justify-between">
                             <span className="font-jost text-body/50 text-[11px]">Sub Total</span>
-                            <span className="font-jost text-cream/70 text-[11px]">{formatINR(pricing.baseTotal)}</span>
+                            <span className="font-jost text-cream/70 text-[11px]">{formatINR(discountedPricing?.discountedBase ?? pricing.baseTotal)}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="font-jost text-body/50 text-[11px]">GST & Fees (18%)</span>
-                            <span className="font-jost text-cream/70 text-[11px]">{formatINR(pricing.gstAmount)}</span>
+                            <span className="font-jost text-cream/70 text-[11px]">{formatINR((discountedPricing ?? pricing).gstAmount)}</span>
                           </div>
 
                           <div className="h-px bg-gold/20" />

@@ -40,13 +40,14 @@ model BlockedDate {
 }
 
 model SeasonRate {
-  id          String   @id @default(cuid())
-  name        String
-  startDate   DateTime
-  endDate     DateTime
-  nightlyRate Int
-  isActive    Boolean  @default(true)
-  createdAt   DateTime @default(now())
+  id              String   @id @default(cuid())
+  name            String
+  startDate       DateTime
+  endDate         DateTime
+  nightlyRate     Int
+  displayDiscount Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
 }
 
 model PromoCode {

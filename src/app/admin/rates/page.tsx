@@ -3,15 +3,16 @@
 import { useState, useEffect } from "react";
 
 interface SeasonRate {
-  id:          string;
-  name:        string;
-  startDate:   string; // ISO string from JSON
-  endDate:     string;
-  nightlyRate: number;
-  isActive:    boolean;
+  id:              string;
+  name:            string;
+  startDate:       string; // ISO string from JSON
+  endDate:         string;
+  nightlyRate:     number;
+  displayDiscount: number;
+  isActive:        boolean;
 }
 
-const EMPTY = { name: "", startDate: "", endDate: "", nightlyRate: 0, isActive: true };
+const EMPTY = { name: "", startDate: "", endDate: "", nightlyRate: 0, displayDiscount: 0, isActive: true };
 const INPUT  = "w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400";
 
 function fmt(n: number) { return "₹" + n.toLocaleString("en-IN"); }
@@ -49,11 +50,12 @@ export default function RatesPage() {
 
   function openEdit(r: SeasonRate) {
     setForm({
-      name:        r.name,
-      startDate:   toInputDate(r.startDate),
-      endDate:     toInputDate(r.endDate),
-      nightlyRate: r.nightlyRate,
-      isActive:    r.isActive,
+      name:            r.name,
+      startDate:       toInputDate(r.startDate),
+      endDate:         toInputDate(r.endDate),
+      nightlyRate:     r.nightlyRate,
+      displayDiscount: r.displayDiscount ?? 0,
+      isActive:        r.isActive,
     });
     setEditId(r.id);
   }
@@ -65,7 +67,7 @@ export default function RatesPage() {
   async function save() {
     if (!form.startDate || !form.endDate) return;
     setSaving(true);
-    const payload = { ...form, nightlyRate: Number(form.nightlyRate) };
+    const payload = { ...form, nightlyRate: Number(form.nightlyRate), displayDiscount: Number(form.displayDiscount ?? 0) };
     if (editId === "new") {
       await fetch("/api/admin/rates", {
         method: "POST",
@@ -100,7 +102,7 @@ export default function RatesPage() {
     await fetch("/api/admin/rates", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...r, isActive: !r.isActive }),
+      body: JSON.stringify({ ...r, displayDiscount: r.displayDiscount ?? 0, isActive: !r.isActive }),
     });
     fetch_();
   }
@@ -143,18 +145,40 @@ export default function RatesPage() {
               Active Rates (GST inclusive)
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {rates.filter((r) => r.isActive).map((r) => (
-                <div key={r.id} className="bg-white rounded-lg p-3 border border-amber-100">
-                  <p className="text-xs text-gray-500 font-medium truncate">{r.name}</p>
-                  <p className="text-lg font-bold text-gray-900 mt-1">
-                    {fmt(Math.round(r.nightlyRate * 1.18))}
-                  </p>
-                  <p className="text-[10px] text-gray-400">Base: {fmt(r.nightlyRate)}</p>
-                  <p className="text-[10px] text-gray-400 mt-0.5">
-                    {fmtDate(r.startDate)} – {fmtDate(r.endDate)}
-                  </p>
-                </div>
-              ))}
+              {rates.filter((r) => r.isActive).map((r) => {
+                const disc = r.displayDiscount ?? 0;
+                const discountedBase = Math.round(r.nightlyRate * (1 - disc / 100));
+                return (
+                  <div key={r.id} className="bg-white rounded-lg p-3 border border-amber-100">
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <p className="text-xs text-gray-500 font-medium truncate">{r.name}</p>
+                      {disc > 0 && (
+                        <span className="shrink-0 text-[9px] font-semibold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded-full">
+                          {disc}% OFF
+                        </span>
+                      )}
+                    </div>
+                    {disc > 0 ? (
+                      <>
+                        <p className="text-[11px] text-gray-400 line-through">
+                          {fmt(Math.round(r.nightlyRate * 1.18))}
+                        </p>
+                        <p className="text-lg font-bold text-amber-700">
+                          {fmt(Math.round(discountedBase * 1.18))}
+                        </p>
+                      </>
+                    ) : (
+                      <p className="text-lg font-bold text-gray-900 mt-1">
+                        {fmt(Math.round(r.nightlyRate * 1.18))}
+                      </p>
+                    )}
+                    <p className="text-[10px] text-gray-400">Base: {fmt(r.nightlyRate)}{disc > 0 ? ` → ${fmt(discountedBase)}` : ""}</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">
+                      {fmtDate(r.startDate)} – {fmtDate(r.endDate)}
+                    </p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
@@ -170,12 +194,12 @@ export default function RatesPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-100 bg-gray-50">
-                  {["Season", "Start Date", "End Date", "Base / Night", "+ GST Total", "Active", ""].map(
+                  {["Season", "Start Date", "End Date", "Base / Night", "Discount", "Guest Pays (GST incl.)", "Active", ""].map(
                     (h) => (
                       <th
                         key={h}
                         className={`px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider ${
-                          h === "Base / Night" || h === "+ GST Total"
+                          h === "Base / Night" || h === "Guest Pays (GST incl.)" || h === "Discount"
                             ? "text-right"
                             : h === "Active"
                             ? "text-center"
@@ -199,8 +223,28 @@ export default function RatesPage() {
                       {fmtDate(r.endDate)}
                     </td>
                     <td className="px-4 py-3.5 text-right text-gray-700">{fmt(r.nightlyRate)}</td>
+                    <td className="px-4 py-3.5 text-right">
+                      {(r.displayDiscount ?? 0) > 0 ? (
+                        <span className="inline-block text-xs font-semibold text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
+                          {r.displayDiscount}% OFF
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-sm">—</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3.5 text-right font-semibold text-gray-900">
-                      {fmt(Math.round(r.nightlyRate * 1.18))}
+                      {(r.displayDiscount ?? 0) > 0 ? (
+                        <span className="flex flex-col items-end gap-0.5">
+                          <span className="text-[11px] text-gray-400 line-through">
+                            {fmt(Math.round(r.nightlyRate * 1.18))}
+                          </span>
+                          <span className="text-amber-700">
+                            {fmt(Math.round(r.nightlyRate * (1 - (r.displayDiscount ?? 0) / 100) * 1.18))}
+                          </span>
+                        </span>
+                      ) : (
+                        fmt(Math.round(r.nightlyRate * 1.18))
+                      )}
                     </td>
                     <td className="px-4 py-3.5 text-center">
                       <button onClick={() => toggle(r)}>
@@ -308,13 +352,39 @@ export default function RatesPage() {
                 </div>
                 {Number(form.nightlyRate) > 0 && (
                   <p className="text-xs text-gray-400 mt-1">
-                    With GST:{" "}
+                    Rack price with GST:{" "}
                     <strong className="text-gray-600">
                       {fmt(Math.round(Number(form.nightlyRate) * 1.18))}
                     </strong>
                     /night
                   </p>
                 )}
+              </Field>
+
+              <Field label="Show Discount % (0 = no discount, max 50)">
+                <div className="relative">
+                  <input
+                    type="number"
+                    min={0}
+                    max={50}
+                    value={form.displayDiscount ?? 0}
+                    onChange={(e) => set("displayDiscount", Math.min(50, Math.max(0, Number(e.target.value))))}
+                    placeholder="0"
+                    className={INPUT}
+                  />
+                </div>
+                {Number(form.displayDiscount) > 0 && Number(form.nightlyRate) > 0 && (() => {
+                  const disc      = Number(form.displayDiscount);
+                  const rack      = Number(form.nightlyRate);
+                  const discBase  = Math.round(rack * (1 - disc / 100));
+                  return (
+                    <div className="mt-1 p-2 bg-amber-50 rounded-lg border border-amber-100 space-y-0.5">
+                      <p className="text-xs text-gray-500 line-through">{fmt(Math.round(rack * 1.18))}/night (rack)</p>
+                      <p className="text-xs font-semibold text-amber-700">{fmt(Math.round(discBase * 1.18))}/night (guest pays)</p>
+                      <p className="text-[10px] text-gray-400">Guest saves {fmt(Math.round((rack - discBase) * 1.18))}/night</p>
+                    </div>
+                  );
+                })()}
               </Field>
 
               <label className="flex items-center gap-2 cursor-pointer">
