@@ -23,10 +23,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid amount" }, { status: 400 });
     }
 
+    const orderAmount = Math.round(amount);
+    console.log("[Razorpay] Creating order:", { amount: orderAmount, currency: "INR" });
+
     const order = await getRazorpay().orders.create({
-      amount: Math.round(amount), // amount in paise
+      amount: orderAmount,
       currency: "INR",
       receipt: `azr_${Date.now()}`,
+      payment_capture: true,
       notes: {
         checkIn: checkIn || "",
         checkOut: checkOut || "",
@@ -36,6 +40,8 @@ export async function POST(req: Request) {
         ...(bookingDetails || {}),
       },
     });
+
+    console.log("[Razorpay] Order created:", { id: order.id, amount: order.amount, status: order.status });
 
     return NextResponse.json({
       order_id: order.id,

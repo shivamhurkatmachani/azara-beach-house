@@ -384,6 +384,14 @@ export default function BookingPage() {
       };
 
       const rzp = new window.Razorpay(options);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (rzp as any).on("payment.failed", (response: any) => {
+        console.error("[Razorpay] Payment failed:", JSON.stringify(response.error, null, 2));
+        setSubmitError(
+          `Payment failed: ${response.error?.description || response.error?.reason || "Unknown error"} (${response.error?.code || "UNKNOWN"})`,
+        );
+        setSubmitting(false);
+      });
       rzp.open();
     } catch (err) {
       setSubmitError(
