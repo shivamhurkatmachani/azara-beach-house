@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 function genRef(): string {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let ref = "AZR-";
