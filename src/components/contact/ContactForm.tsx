@@ -14,16 +14,12 @@ interface FormState {
   message:    string;
 }
 
-const COUNTRY_CODES = [
-  { code: "+91",  flag: "🇮🇳", label: "IN" },
-  { code: "+1",   flag: "🇺🇸", label: "US" },
-  { code: "+44",  flag: "🇬🇧", label: "UK" },
-  { code: "+971", flag: "🇦🇪", label: "AE" },
-  { code: "+65",  flag: "🇸🇬", label: "SG" },
-  { code: "+61",  flag: "🇦🇺", label: "AU" },
-  { code: "+49",  flag: "🇩🇪", label: "DE" },
-  { code: "+33",  flag: "🇫🇷", label: "FR" },
-];
+function isValidEmail(v: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+function stripNonDigits(v: string) {
+  return v.replace(/\D/g, "");
+}
 
 const GUEST_OPTIONS = [
   "1–2 guests",
@@ -56,6 +52,8 @@ export default function ContactForm() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading]     = useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
   const set = (key: keyof FormState) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -63,6 +61,9 @@ export default function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isValidEmail(form.email)) { setEmailError("Please enter a valid email address"); return; }
+    const digits = stripNonDigits(form.phone);
+    if (digits.length < 7 || digits.length > 15) { setPhoneError("Phone number must be 7–15 digits"); return; }
     setLoading(true);
     try {
       const res = await fetch("/api/contact", {
@@ -160,9 +161,11 @@ export default function ContactForm() {
                   required
                   placeholder="you@example.com"
                   value={form.email}
-                  onChange={set("email")}
+                  onChange={e => { setForm(f => ({ ...f, email: e.target.value })); setEmailError(""); }}
+                  onBlur={() => { if (form.email && !isValidEmail(form.email)) setEmailError("Please enter a valid email address"); }}
                   className={INPUT_BASE}
                 />
+                {emailError && <p className="mt-1 font-jost text-[11px] text-red-400">{emailError}</p>}
               </div>
             </div>
 
@@ -170,33 +173,29 @@ export default function ContactForm() {
             <div>
               <FieldLabel>Phone Number *</FieldLabel>
               <div className="flex gap-0">
-                <select
+                <input
+                  type="text"
                   value={form.countryCode}
-                  onChange={set("countryCode")}
+                  onChange={e => setForm(f => ({ ...f, countryCode: e.target.value }))}
                   className={[
                     "bg-white/[0.03] border border-r-0 border-white/[0.2]",
-                    "px-3 py-[14px] font-jost text-body/80 text-[12px] tracking-wider",
+                    "px-3 py-[14px] font-jost text-body/80 text-[13px] tracking-wider text-center",
                     "focus:outline-none focus:border-gold/60 transition-colors duration-300",
-                    "cursor-pointer shrink-0 appearance-none",
+                    "shrink-0",
                   ].join(" ")}
                   style={{ width: "80px" }}
-                >
-                  {COUNTRY_CODES.map((c) => (
-                    <option key={c.code} value={c.code}
-                      className="bg-[#0A0A0A] text-cream">
-                      {c.code}
-                    </option>
-                  ))}
-                </select>
+                />
                 <input
                   type="tel"
                   required
                   placeholder="Phone number"
                   value={form.phone}
-                  onChange={set("phone")}
+                  onChange={e => { setForm(f => ({ ...f, phone: stripNonDigits(e.target.value) })); setPhoneError(""); }}
+                  onBlur={() => { const d = stripNonDigits(form.phone); if (d.length > 0 && (d.length < 7 || d.length > 15)) setPhoneError("Phone number must be 7–15 digits"); }}
                   className={INPUT_BASE + " flex-1"}
                 />
               </div>
+              {phoneError && <p className="mt-1 font-jost text-[11px] text-red-400">{phoneError}</p>}
             </div>
 
             {/* Date range */}

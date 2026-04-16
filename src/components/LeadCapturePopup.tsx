@@ -8,6 +8,13 @@ const GOLD  = "#B8976A";
 const DARK  = "#1A1A1A";
 const WA_URL = "https://wa.me/919090407408";
 
+function isValidEmail(v: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+function stripNonDigits(v: string) {
+  return v.replace(/\D/g, "");
+}
+
 const SHOW_DELAY_MS  = 30_000;
 const AUTO_CLOSE_MS  = 5_000;
 const SESSION_KEY    = "azara_popup_shown";
@@ -29,9 +36,12 @@ export default function LeadCapturePopup() {
   /* Fields */
   const [name,        setName]        = useState("");
   const [email,       setEmail]       = useState("");
-  const [phone,       setPhone]       = useState("+91 ");
+  const [cc,          setCC]          = useState("+91");
+  const [phone,       setPhone]       = useState("");
   const [travelDates, setTravelDates] = useState("");
   const [guests,      setGuests]      = useState("2");
+  const [emailError,  setEmailError]  = useState("");
+  const [phoneError,  setPhoneError]  = useState("");
 
   /* ── Decide whether / when to show ───────────────────────── */
   useEffect(() => {
@@ -65,12 +75,15 @@ export default function LeadCapturePopup() {
   /* ── Submit ───────────────────────────────────────────────── */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!isValidEmail(email)) { setEmailError("Please enter a valid email address"); return; }
+    const digits = stripNonDigits(phone);
+    if (digits.length < 7 || digits.length > 15) { setPhoneError("Phone number must be 7–15 digits"); return; }
     setLoading(true);
     try {
       await fetch("/api/leads", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone, travelDates, guests }),
+        body: JSON.stringify({ name, email, phone: `${cc} ${phone}`, travelDates, guests }),
       });
     } catch {/* swallow — UX still proceeds */}
 
@@ -210,40 +223,54 @@ export default function LeadCapturePopup() {
                         />
                       </div>
 
-                      {/* Email + Phone row */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="flex flex-col gap-1.5">
-                          <label className="font-jost text-[10px] tracking-wider uppercase"
-                            style={{ color: "rgba(255,255,255,0.35)" }}>
-                            Email <span style={{ color: GOLD }}>*</span>
-                          </label>
+                      {/* Email */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-jost text-[10px] tracking-wider uppercase"
+                          style={{ color: "rgba(255,255,255,0.35)" }}>
+                          Email <span style={{ color: GOLD }}>*</span>
+                        </label>
+                        <input
+                          required
+                          type="email"
+                          value={email}
+                          onChange={e => { setEmail(e.target.value); setEmailError(""); }}
+                          onBlur={() => { if (email && !isValidEmail(email)) setEmailError("Please enter a valid email address"); }}
+                          placeholder="arjun@example.com"
+                          className="w-full px-3 py-2.5 rounded-sm font-jost text-sm text-white
+                                     placeholder:text-white/20 outline-none transition-colors duration-200
+                                     bg-white/[0.04] border border-white/10 focus:border-[#B8976A]/50"
+                        />
+                        {emailError && <p className="font-jost text-[10px] text-red-400 mt-0.5">{emailError}</p>}
+                      </div>
+
+                      {/* Phone */}
+                      <div className="flex flex-col gap-1.5">
+                        <label className="font-jost text-[10px] tracking-wider uppercase"
+                          style={{ color: "rgba(255,255,255,0.35)" }}>
+                          Phone <span style={{ color: GOLD }}>*</span>
+                        </label>
+                        <div className="flex">
                           <input
-                            required
-                            type="email"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                            placeholder="arjun@example.com"
-                            className="w-full px-3 py-2.5 rounded-sm font-jost text-sm text-white
-                                       placeholder:text-white/20 outline-none transition-colors duration-200
-                                       bg-white/[0.04] border border-white/10 focus:border-[#B8976A]/50"
+                            type="text"
+                            value={cc}
+                            onChange={e => setCC(e.target.value)}
+                            className="w-[70px] px-2 py-2.5 rounded-sm rounded-r-none font-jost text-sm text-white text-center
+                                       outline-none transition-colors duration-200
+                                       bg-white/[0.04] border border-r-0 border-white/10 focus:border-[#B8976A]/50"
                           />
-                        </div>
-                        <div className="flex flex-col gap-1.5">
-                          <label className="font-jost text-[10px] tracking-wider uppercase"
-                            style={{ color: "rgba(255,255,255,0.35)" }}>
-                            Phone <span style={{ color: GOLD }}>*</span>
-                          </label>
                           <input
                             required
                             type="tel"
                             value={phone}
-                            onChange={e => setPhone(e.target.value)}
-                            placeholder="+91 98765 43210"
-                            className="w-full px-3 py-2.5 rounded-sm font-jost text-sm text-white
+                            onChange={e => { setPhone(stripNonDigits(e.target.value)); setPhoneError(""); }}
+                            onBlur={() => { const d = stripNonDigits(phone); if (d.length > 0 && (d.length < 7 || d.length > 15)) setPhoneError("Phone number must be 7–15 digits"); }}
+                            placeholder="98765 43210"
+                            className="flex-1 px-3 py-2.5 rounded-sm rounded-l-none font-jost text-sm text-white
                                        placeholder:text-white/20 outline-none transition-colors duration-200
                                        bg-white/[0.04] border border-white/10 focus:border-[#B8976A]/50"
                           />
                         </div>
+                        {phoneError && <p className="font-jost text-[10px] text-red-400 mt-0.5">{phoneError}</p>}
                       </div>
 
                       {/* Travel dates + Guests row */}

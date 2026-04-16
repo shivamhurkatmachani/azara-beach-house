@@ -19,11 +19,12 @@ type Step = "search" | "villa" | "guest" | "confirmation";
 type PayOpt = "50" | "100";
 type VillaTab = "rates" | "amenities" | "photos";
 
-const COUNTRY_CODES = [
-  { v: "+91", l: "🇮🇳 +91" }, { v: "+1",  l: "🇺🇸 +1"  },
-  { v: "+44", l: "🇬🇧 +44" }, { v: "+971",l: "🇦🇪 +971" },
-  { v: "+65", l: "🇸🇬 +65" }, { v: "+61", l: "🇦🇺 +61"  },
-];
+function isValidEmail(v: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+function stripNonDigits(v: string) {
+  return v.replace(/\D/g, "");
+}
 
 const VILLA_AMENITIES = [
   "Rooftop Infinity Pool", "Main Chevron Pool with Fountain",
@@ -48,7 +49,7 @@ const VILLA_PHOTOS = [
 /* ─── Shared UI atoms ──────────────────────────────────────── */
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-2">
+    <p className="font-jost text-[#D4CEC4] text-[12px] tracking-[0.18em] uppercase mb-2">
       {children}
     </p>
   );
@@ -58,9 +59,9 @@ function FieldWrap({ children, className="" }: { children: React.ReactNode; clas
 }
 
 const FIELD =
-  "w-full bg-[#1A1A1A] border border-[rgba(184,151,106,0.3)] px-4 py-[14px] " +
-  "font-jost text-[#F5F0E8] text-[14px] tracking-[0.02em] placeholder:text-[#888] " +
-  "focus:outline-none focus:border-[#B8976A] focus:text-[#F5F0E8] transition-colors duration-300";
+  "w-full bg-[#1A1A1A] border border-[rgba(184,151,106,0.45)] px-4 py-[14px] " +
+  "font-jost text-[#F5F0E8] text-[15px] tracking-[0.02em] placeholder:text-[#777] " +
+  "focus:outline-none focus:border-[#B8976A] focus:shadow-[0_0_8px_rgba(184,151,106,0.15)] focus:text-[#F5F0E8] transition-all duration-300";
 
 /* ─── Counter ──────────────────────────────────────────────── */
 function Counter({
@@ -146,6 +147,8 @@ export default function BookingPage() {
   const [agreed,    setAgreed]    = useState(false);
   const [bookingRef,setBookingRef]= useState("");
   const [submitting,setSubmitting]= useState(false);
+  const [emailError, setEmailError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
 
   /* ── Router ───────────────────────────────────────────── */
   const router = useRouter();
@@ -259,6 +262,17 @@ export default function BookingPage() {
     // Validate required fields
     if (!firstName.trim() || !email.trim() || !phone.trim()) {
       setSubmitError("Please fill in all required fields (name, email, phone).");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setEmailError("Please enter a valid email address");
+      setSubmitError("Please fix the errors above.");
+      return;
+    }
+    const digits = stripNonDigits(phone);
+    if (digits.length < 7 || digits.length > 15) {
+      setPhoneError("Phone number must be 7–15 digits");
+      setSubmitError("Please fix the errors above.");
       return;
     }
 
@@ -486,11 +500,11 @@ export default function BookingPage() {
                   { label: "Check-out", val: checkOut ? fmtDate(checkOut) : "Select date" },
                 ].map(({ label, val }) => (
                   <div key={label} className="bg-charcoal px-5 py-5">
-                    <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-1">
+                    <p className="font-jost text-[#D4CEC4] text-[12px] tracking-[0.18em] uppercase mb-1">
                       {label}
                     </p>
                     <p className={[
-                      "font-cormorant font-light text-[28px] tracking-[0.04em] italic",
+                      "font-cormorant font-light text-[32px] tracking-[0.04em] italic",
                       val.includes("Select") ? "text-body/50" : "text-[#F5F0E8]",
                     ].join(" ")}>
                       {val}
@@ -523,7 +537,7 @@ export default function BookingPage() {
 
               {/* Guests + Promo */}
               <div className="border border-white/[0.06] bg-[#0D0D0D] p-5 md:p-7">
-                <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-3">
+                <p className="font-jost text-[#D4CEC4] text-[12px] tracking-[0.18em] uppercase mb-3">
                   Guests
                 </p>
                 <Counter label="Adults"                value={adults}   min={1} max={10} onChange={v => { setAdults(v); if (v + children > 12) setChildren(12 - v); }} />
@@ -571,7 +585,7 @@ export default function BookingPage() {
                 onClick={handleCheckAvailability}
                 disabled={!checkIn || !checkOut || rangeHasBlocked || !!pricing?.rateUnavailable}
                 className={[
-                  "w-full py-[16px] font-jost text-[13px] font-medium tracking-widest uppercase",
+                  "w-full py-[16px] font-jost text-[14px] font-medium tracking-widest uppercase",
                   "border transition-all duration-300",
                   checkIn && checkOut && !rangeHasBlocked && !pricing?.rateUnavailable
                     ? "border-gold text-cream bg-gold/[0.1] hover:bg-gold/[0.18] cursor-pointer"
@@ -602,7 +616,7 @@ export default function BookingPage() {
             <div className="flex flex-col gap-6">
               {/* Key info card */}
               <div className="border border-white/[0.07] bg-[#0D0D0D] p-6">
-                <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-4">Villa Details</p>
+                <p className="font-jost text-[#D4CEC4] text-[12px] tracking-[0.18em] uppercase mb-4">Villa Details</p>
                 <div className="flex flex-col gap-3">
                   {[
                     "5 bedrooms · 10 pax occupancy",
@@ -613,7 +627,7 @@ export default function BookingPage() {
                   ].map(note => (
                     <div key={note} className="flex items-start gap-3">
                       <div className="mt-[6px] w-1 h-1 rounded-full bg-gold/40 shrink-0" />
-                      <p className="font-jost text-[#F5F0E8]/70 text-[13px] tracking-[0.03em] leading-relaxed">
+                      <p className="font-jost text-[#AAA] text-[14px] tracking-[0.03em] leading-relaxed">
                         {note}
                       </p>
                     </div>
@@ -623,7 +637,7 @@ export default function BookingPage() {
 
               {/* Offers */}
               <div className="border border-gold/15 bg-gold/[0.03] p-6">
-                <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-4">Exclusive Offers</p>
+                <p className="font-jost text-[#D4CEC4] text-[12px] tracking-[0.18em] uppercase mb-4">Exclusive Offers</p>
                 <div className="flex flex-col gap-4">
                   {[
                     { badge: "10% Off", text: "When you book directly from our official website" },
@@ -635,7 +649,7 @@ export default function BookingPage() {
                                        border border-gold/35 text-gold/70 px-2 py-[3px] shrink-0 mt-[1px]">
                         {o.badge}
                       </span>
-                      <p className="font-jost text-[#F5F0E8]/80 text-[13px] tracking-[0.03em] leading-relaxed">
+                      <p className="font-jost text-[#AAA] text-[14px] tracking-[0.03em] leading-relaxed">
                         {o.text}
                       </p>
                     </div>
@@ -645,7 +659,7 @@ export default function BookingPage() {
 
               {/* USP list */}
               <div className="border border-white/[0.06] bg-[#0D0D0D] p-6">
-                <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-4">Why Azara</p>
+                <p className="font-jost text-[#D4CEC4] text-[12px] tracking-[0.18em] uppercase mb-4">Why Azara</p>
                 <div className="flex flex-col divide-y divide-white/[0.05]">
                   {[
                     "Private Swimming Pool & Jacuzzi",
@@ -660,7 +674,7 @@ export default function BookingPage() {
                         className="text-gold/60 shrink-0">
                         <path d="M20 6L9 17l-5-5" />
                       </svg>
-                      <p className="font-jost text-[#F5F0E8]/80 text-[13px] tracking-[0.03em]">
+                      <p className="font-jost text-[#AAA] text-[14px] tracking-[0.03em]">
                         {usp}
                       </p>
                     </div>
@@ -1127,27 +1141,32 @@ export default function BookingPage() {
                     <FieldWrap>
                       <Label>Email Address *</Label>
                       <input type="email" required placeholder="you@example.com" value={email}
-                        onChange={e => setEmail(e.target.value)} className={FIELD} />
+                        onChange={e => { setEmail(e.target.value); setEmailError(""); }}
+                        onBlur={() => { if (email && !isValidEmail(email)) setEmailError("Please enter a valid email address"); }}
+                        className={FIELD} />
+                      {emailError && <p className="mt-1 font-jost text-[11px] text-red-400">{emailError}</p>}
                     </FieldWrap>
 
                     {/* Phone */}
                     <FieldWrap>
                       <Label>Phone Number *</Label>
                       <div className="flex">
-                        <select value={cc} onChange={e => setCC(e.target.value)}
-                          className="bg-[#1A1A1A] border border-r-0 border-[rgba(184,151,106,0.3)]
-                                     px-2 py-[14px] font-jost text-[#F5F0E8]/70 text-[13px]
+                        <input
+                          type="text"
+                          value={cc}
+                          onChange={e => setCC(e.target.value)}
+                          className="bg-[#1A1A1A] border border-r-0 border-[rgba(184,151,106,0.45)]
+                                     px-3 py-[14px] font-jost text-[#F5F0E8]/70 text-[15px] text-center
                                      focus:outline-none focus:border-[#B8976A] shrink-0
-                                     transition-colors duration-300 cursor-pointer appearance-none"
-                          style={{ width: "90px" }}>
-                          {COUNTRY_CODES.map(c => (
-                            <option key={c.v} value={c.v} className="bg-[#0A0A0A] text-cream">{c.l}</option>
-                          ))}
-                        </select>
+                                     transition-all duration-300"
+                          style={{ width: "80px" }}
+                        />
                         <input type="tel" required placeholder="Phone number" value={phone}
-                          onChange={e => setPhone(e.target.value)}
+                          onChange={e => { setPhone(stripNonDigits(e.target.value)); setPhoneError(""); }}
+                          onBlur={() => { const d = stripNonDigits(phone); if (d.length > 0 && (d.length < 7 || d.length > 15)) setPhoneError("Phone number must be 7–15 digits"); }}
                           className={FIELD + " flex-1"} />
                       </div>
+                      {phoneError && <p className="mt-1 font-jost text-[11px] text-red-400">{phoneError}</p>}
                     </FieldWrap>
 
                     {/* GST */}
@@ -1375,7 +1394,7 @@ export default function BookingPage() {
                         type="submit"
                         disabled={!agreed || submitting || !firstName || !email || !phone}
                         className={[
-                          "w-full py-4 font-jost text-[12px] tracking-widest uppercase font-medium",
+                          "w-full py-4 font-jost text-[13px] tracking-widest uppercase font-medium",
                           "border transition-all duration-300 flex items-center justify-center gap-3",
                           agreed && !submitting && firstName && email && phone
                             ? "border-gold text-cream bg-gold/[0.12] hover:bg-gold/[0.22] cursor-pointer"

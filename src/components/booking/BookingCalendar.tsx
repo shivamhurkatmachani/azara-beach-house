@@ -82,7 +82,7 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
     const grid = buildGrid(year, month);
     return (
       <div className="flex-1 min-w-0">
-        <p className="font-jost text-[#F5F0E8]/70 text-[11px] tracking-widest uppercase
+        <p className="font-jost text-[#F5F0E8]/80 text-[12px] tracking-widest uppercase
                       text-center mb-5 pb-3 border-b border-white/[0.06]">
           {MONTHS[month]} {year}
         </p>
@@ -122,11 +122,11 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
                   onMouseEnter={() => !dis && setHover(date)}
                   onMouseLeave={() => setHover(null)}
                   className={[
-                    "relative z-10 w-9 h-9 flex items-center justify-center",
-                    "font-jost text-[14px] tracking-wide transition-all duration-150",
+                    "relative z-10 w-10 h-10 flex items-center justify-center",
+                    "font-jost text-[16px] tracking-wide transition-all duration-150",
                     /* Selected */
                     ci || co
-                      ? "rounded-full bg-gold text-charcoal font-medium"
+                      ? "rounded-full bg-[#CBA878] text-charcoal font-medium shadow-[0_0_12px_rgba(203,168,120,0.4)]"
                       : "",
                     /* Disabled */
                     dis
@@ -134,7 +134,7 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
                       : "cursor-pointer",
                     /* Today */
                     tod && !ci && !co
-                      ? "text-gold ring-1 ring-gold/40 rounded-full"
+                      ? "text-gold ring-1 ring-gold/60 rounded-full"
                       : "",
                     /* Normal hover */
                     !dis && !ci && !co
@@ -161,11 +161,11 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
         <button
           type="button"
           onClick={prevMonth}
-          className="w-11 h-11 flex items-center justify-center
-                     text-body/40 hover:text-cream transition-colors"
+          className="w-11 h-11 flex items-center justify-center rounded-full
+                     text-body/40 hover:text-cream hover:bg-white/[0.06] transition-all duration-200"
           aria-label="Previous month"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <path d="M15 18l-6-6 6-6" />
           </svg>
@@ -173,11 +173,11 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
         <button
           type="button"
           onClick={() => setLeftMonth(addMonths(leftMonth, 1))}
-          className="w-11 h-11 flex items-center justify-center
-                     text-body/40 hover:text-cream transition-colors"
+          className="w-11 h-11 flex items-center justify-center rounded-full
+                     text-body/40 hover:text-cream hover:bg-white/[0.06] transition-all duration-200"
           aria-label="Next month"
         >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
             <path d="M9 18l6-6-6-6" />
           </svg>
