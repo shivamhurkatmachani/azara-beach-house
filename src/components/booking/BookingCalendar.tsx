@@ -82,14 +82,14 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
     const grid = buildGrid(year, month);
     return (
       <div className="flex-1 min-w-0">
-        <p className="font-jost text-cream/60 text-[10px] tracking-widest uppercase
+        <p className="font-jost text-[#F5F0E8]/70 text-[11px] tracking-widest uppercase
                       text-center mb-5 pb-3 border-b border-white/[0.06]">
           {MONTHS[month]} {year}
         </p>
         {/* Day name headers */}
         <div className="grid grid-cols-7 mb-1">
           {DAYS.map(d => (
-            <span key={d} className="font-jost text-body/30 text-[10px] tracking-wide
+            <span key={d} className="font-jost text-[#F5F0E8]/40 text-[11px] tracking-wide
                                      text-center h-9 flex items-center justify-center">
               {d}
             </span>
@@ -123,14 +123,14 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
                   onMouseLeave={() => setHover(null)}
                   className={[
                     "relative z-10 w-9 h-9 flex items-center justify-center",
-                    "font-jost text-[13px] tracking-wide transition-all duration-150",
+                    "font-jost text-[14px] tracking-wide transition-all duration-150",
                     /* Selected */
                     ci || co
                       ? "rounded-full bg-gold text-charcoal font-medium"
                       : "",
                     /* Disabled */
                     dis
-                      ? "text-body/40 cursor-not-allowed"
+                      ? "text-[#F5F0E8]/30 cursor-not-allowed"
                       : "cursor-pointer",
                     /* Today */
                     tod && !ci && !co
@@ -138,10 +138,10 @@ export default function BookingCalendar({ checkIn, checkOut, onChange, blockedDa
                       : "",
                     /* Normal hover */
                     !dis && !ci && !co
-                      ? "text-cream/90 hover:bg-gold/25 hover:text-cream hover:rounded-full"
+                      ? "text-[#F5F0E8] hover:bg-gold/25 hover:text-cream hover:rounded-full"
                       : "",
                     /* In-range (normal) */
-                    ir && !ci && !co && !dis ? "text-cream/80" : "",
+                    ir && !ci && !co && !dis ? "text-[#F5F0E8]/90" : "",
                   ].join(" ")}
                 >
                   {date.getDate()}

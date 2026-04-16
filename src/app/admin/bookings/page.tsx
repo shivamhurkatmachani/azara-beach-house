@@ -9,6 +9,8 @@ interface Booking {
   gstNumber?: string; specialRequests?: string; promoCode?: string;
   paymentOption: string; baseTotal: number; gstAmount: number; grandTotal: number;
   status: string; paidAmount: number; adminNotes?: string;
+  razorpayOrderId?: string; razorpayPaymentId?: string; razorpaySignature?: string;
+  paymentStatus?: string; amountDue?: number;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -167,7 +169,7 @@ export default function BookingsPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-gray-100 bg-gray-50">
-                    {["Ref","Check-in","Check-out","Guest","Nights","Guests","Total","Payment","Status"].map(h => (
+                    {["Ref","Check-in","Check-out","Guest","Nights","Guests","Total","Option","Payment","Status"].map(h => (
                       <th key={h} className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">{h}</th>
                     ))}
                   </tr>
@@ -186,7 +188,16 @@ export default function BookingsPage() {
                       <td className="px-4 py-3.5 text-gray-600">{b.nights}N</td>
                       <td className="px-4 py-3.5 text-gray-600">{b.adults}A{b.children > 0 ? ` ${b.children}C` : ""}</td>
                       <td className="px-4 py-3.5 font-medium text-gray-900">{fmt(b.grandTotal)}</td>
-                      <td className="px-4 py-3.5 text-xs text-gray-500">{b.paymentOption === "full" ? "100%" : "50%"}</td>
+                      <td className="px-4 py-3.5 text-xs text-gray-500">{b.paymentOption === "100" ? "100%" : "50%"}</td>
+                      <td className="px-4 py-3.5">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
+                          b.paymentStatus === "PAID" ? "bg-emerald-100 text-emerald-700 border-emerald-200" :
+                          b.paymentStatus === "PARTIALLY_PAID" ? "bg-amber-100 text-amber-700 border-amber-200" :
+                          "bg-gray-100 text-gray-500 border-gray-200"
+                        }`}>
+                          {b.paymentStatus === "PAID" ? "PAID" : b.paymentStatus === "PARTIALLY_PAID" ? "PARTIAL" : "PENDING"}
+                        </span>
+                      </td>
                       <td className="px-4 py-3.5">
                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border capitalize ${STATUS_COLORS[b.status] ?? "bg-gray-100 text-gray-600 border-gray-200"}`}>
                           {b.status}
@@ -251,12 +262,26 @@ export default function BookingsPage() {
               <div>
                 <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Payment</h3>
                 <div className="space-y-2">
-                  <Row label="Option"      value={selected.paymentOption === "full" ? "100% upfront" : "50% advance"} />
+                  <Row label="Option"      value={selected.paymentOption === "100" ? "100% upfront" : "50% advance"} />
                   <Row label="Base Amount" value={fmt(selected.baseTotal)} />
                   <Row label="GST (18%)"   value={fmt(selected.gstAmount)} />
                   <Row label="Grand Total" value={fmt(selected.grandTotal)} bold />
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-gray-400 w-28 shrink-0">Amount Paid</span>
+                  <Row label="Payment Status" value={selected.paymentStatus || "PENDING"} bold />
+                  <Row label="Amount Paid" value={fmt(selected.paidAmount)} />
+                  {(selected.amountDue ?? 0) > 0 && (
+                    <div className="flex gap-3">
+                      <span className="text-xs text-gray-400 w-28 shrink-0 pt-0.5">Amount Due</span>
+                      <span className="text-sm font-semibold text-red-600">{fmt(selected.amountDue!)}</span>
+                    </div>
+                  )}
+                  {selected.razorpayPaymentId && (
+                    <Row label="Razorpay ID" value={selected.razorpayPaymentId} />
+                  )}
+                  {selected.razorpayOrderId && (
+                    <Row label="Order ID" value={selected.razorpayOrderId} />
+                  )}
+                  <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+                    <span className="text-xs text-gray-400 w-28 shrink-0">Update Paid</span>
                     <div className="flex items-center gap-2">
                       <span className="text-gray-500 text-sm">₹</span>
                       <input type="number" value={paidAmt} onChange={e => setPaidAmt(e.target.value)}

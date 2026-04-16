@@ -1,11 +1,18 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import BookingCalendar from "./BookingCalendar";
 import { calculatePricing, formatINR, fmtDate, toYMD, type DBSeasonRate } from "@/lib/pricing";
+
+declare global {
+  interface Window {
+    Razorpay: new (options: Record<string, unknown>) => { open: () => void };
+  }
+}
 
 /* ─── Types ────────────────────────────────────────────────── */
 type Step = "search" | "villa" | "guest" | "confirmation";
@@ -41,7 +48,7 @@ const VILLA_PHOTOS = [
 /* ─── Shared UI atoms ──────────────────────────────────────── */
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <p className="font-jost text-body/55 text-[10px] tracking-widest uppercase mb-2">
+    <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-2">
       {children}
     </p>
   );
@@ -51,9 +58,9 @@ function FieldWrap({ children, className="" }: { children: React.ReactNode; clas
 }
 
 const FIELD =
-  "w-full bg-transparent border border-white/[0.2] px-4 py-[13px] " +
-  "font-jost text-cream/90 text-[13px] tracking-[0.02em] placeholder:text-body/40 " +
-  "focus:outline-none focus:border-gold/50 focus:text-cream transition-colors duration-300";
+  "w-full bg-[#1A1A1A] border border-[rgba(184,151,106,0.3)] px-4 py-[14px] " +
+  "font-jost text-[#F5F0E8] text-[14px] tracking-[0.02em] placeholder:text-[#888] " +
+  "focus:outline-none focus:border-[#B8976A] focus:text-[#F5F0E8] transition-colors duration-300";
 
 /* ─── Counter ──────────────────────────────────────────────── */
 function Counter({
@@ -62,7 +69,7 @@ function Counter({
   return (
     <div className="flex items-center justify-between py-4 border-b border-white/[0.06]">
       <div>
-        <p className="font-jost text-cream/80 text-[13px] tracking-[0.02em]">{label}</p>
+        <p className="font-jost text-[#F5F0E8]/90 text-[14px] tracking-[0.02em]">{label}</p>
       </div>
       <div className="flex items-center gap-4">
         <button type="button" onClick={() => onChange(Math.max(min, value-1))}
@@ -139,6 +146,9 @@ export default function BookingPage() {
   const [agreed,    setAgreed]    = useState(false);
   const [bookingRef,setBookingRef]= useState("");
   const [submitting,setSubmitting]= useState(false);
+
+  /* ── Router ───────────────────────────────────────────── */
+  const router = useRouter();
 
   /* ── Refs for scroll ──────────────────────────────────── */
   const villaRef  = useRef<HTMLDivElement>(null);
@@ -245,50 +255,137 @@ export default function BookingPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!agreed || !pricing || pricing.rateUnavailable || !checkIn || !checkOut) return;
+
+    // Validate required fields
+    if (!firstName.trim() || !email.trim() || !phone.trim()) {
+      setSubmitError("Please fill in all required fields (name, email, phone).");
+      return;
+    }
+
     setSubmitting(true);
     setSubmitError(null);
+
     try {
-      const res = await fetch("/api/bookings", {
+      const finalPricing = discountedPricing ?? pricing;
+      const payAmount = payOpt === "50" ? finalPricing.halfPayNow : finalPricing.grandTotal;
+      const amountInPaise = payAmount * 100;
+
+      // Step 1: Create Razorpay order
+      const orderRes = await fetch("/api/payment/create-order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          checkIn:         checkIn.toISOString(),
-          checkOut:        checkOut.toISOString(),
-          nights:          pricing.nights,
-          adults,
-          children,
-          firstName,
-          lastName,
+          amount: amountInPaise,
+          checkIn: checkIn.toISOString(),
+          checkOut: checkOut.toISOString(),
+          guestName: `${firstName} ${lastName}`.trim(),
           email,
-          phone:           `${cc} ${phone}`,
-          gstNumber:       gst || null,
-          specialRequests: requests || null,
-          promoCode:       promo || null,
-          paymentOption:   payOpt,
-          baseTotal:       (discountedPricing ?? pricing).baseTotal,
-          gstAmount:       (discountedPricing ?? pricing).gstAmount,
-          grandTotal:      (discountedPricing ?? pricing).grandTotal,
+          phone: `${cc} ${phone}`,
         }),
       });
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Server error ${res.status}`);
+      if (!orderRes.ok) {
+        const errData = await orderRes.json().catch(() => ({}));
+        throw new Error(errData.error || "Failed to create payment order.");
       }
 
-      const data = await res.json();
-      if (!data.ref) throw new Error("No booking reference returned");
+      const orderData = await orderRes.json();
 
-      setBookingRef(data.ref);
-      setStep("confirmation");
-      setTimeout(() => confirmRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
+      // Step 2: Open Razorpay checkout modal
+      const options: Record<string, unknown> = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: orderData.currency,
+        name: "Azara Beach House",
+        description: `Booking for ${fmtDate(checkIn)} to ${fmtDate(checkOut)}`,
+        image: "/images/logo.png",
+        order_id: orderData.order_id,
+        handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+          // Step 3: Verify payment on server
+          try {
+            const verifyRes = await fetch("/api/payment/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                booking: {
+                  checkIn: checkIn.toISOString(),
+                  checkOut: checkOut.toISOString(),
+                  nights: pricing.nights,
+                  adults,
+                  children,
+                  firstName,
+                  lastName,
+                  email,
+                  phone: `${cc} ${phone}`,
+                  gstNumber: gst || null,
+                  specialRequests: requests || null,
+                  promoCode: promo || null,
+                  paymentOption: payOpt,
+                  baseTotal: finalPricing.baseTotal,
+                  gstAmount: finalPricing.gstAmount,
+                  grandTotal: finalPricing.grandTotal,
+                },
+              }),
+            });
+
+            if (!verifyRes.ok) {
+              const errData = await verifyRes.json().catch(() => ({}));
+              throw new Error(errData.error || "Payment verification failed.");
+            }
+
+            const verifyData = await verifyRes.json();
+
+            // Redirect to confirmation page
+            const params = new URLSearchParams({
+              ref: verifyData.ref,
+              paid: String(verifyData.amountPaid),
+              due: String(verifyData.amountDue),
+              checkIn: fmtDate(checkIn),
+              checkOut: fmtDate(checkOut),
+              guests: `${adults + children} (${adults} adults)`,
+              nights: String(pricing.nights),
+              status: verifyData.paymentStatus,
+            });
+            router.push(`/booking-confirmation?${params.toString()}`);
+          } catch (err) {
+            setSubmitError(
+              err instanceof Error ? err.message : "Payment verification failed. Please contact support.",
+            );
+            setSubmitting(false);
+          }
+        },
+        prefill: {
+          name: `${firstName} ${lastName}`.trim(),
+          email,
+          contact: phone,
+        },
+        notes: {
+          checkIn: fmtDate(checkIn),
+          checkOut: fmtDate(checkOut),
+          guests: `${adults + children}`,
+        },
+        theme: {
+          color: "#B8976A",
+        },
+        modal: {
+          ondismiss: () => {
+            setSubmitError("Payment cancelled. Please try again.");
+            setSubmitting(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
     } catch (err) {
       setSubmitError(
         err instanceof Error
           ? err.message
           : "Something went wrong. Please try again or contact us on WhatsApp.",
       );
-    } finally {
       setSubmitting(false);
     }
   }
@@ -312,24 +409,24 @@ export default function BookingPage() {
           <div className="hidden sm:block w-px h-4 bg-white/[0.1] shrink-0" />
           {/* Check-in */}
           <div className="flex flex-col shrink-0">
-            <span className="font-jost text-body/35 text-[10px] tracking-widest uppercase">Check-in</span>
-            <span className="font-jost text-cream/70 text-[11px]">
+            <span className="font-jost text-gold/60 text-[10px] tracking-widest uppercase">Check-in</span>
+            <span className="font-jost text-[#F5F0E8]/80 text-[12px]">
               {checkIn ? fmtDate(checkIn) : "—"}
             </span>
           </div>
           <div className="w-px h-4 bg-white/[0.1] shrink-0" />
           {/* Check-out */}
           <div className="flex flex-col shrink-0">
-            <span className="font-jost text-body/35 text-[10px] tracking-widest uppercase">Check-out</span>
-            <span className="font-jost text-cream/70 text-[11px]">
+            <span className="font-jost text-gold/60 text-[10px] tracking-widest uppercase">Check-out</span>
+            <span className="font-jost text-[#F5F0E8]/80 text-[12px]">
               {checkOut ? fmtDate(checkOut) : "—"}
             </span>
           </div>
           <div className="w-px h-4 bg-white/[0.1] shrink-0" />
           {/* Guests */}
           <div className="flex flex-col shrink-0">
-            <span className="font-jost text-body/35 text-[10px] tracking-widest uppercase">Guests</span>
-            <span className="font-jost text-cream/70 text-[11px]">
+            <span className="font-jost text-gold/60 text-[10px] tracking-widest uppercase">Guests</span>
+            <span className="font-jost text-[#F5F0E8]/80 text-[12px]">
               {adults + children} total · {adults} adults
             </span>
           </div>
@@ -374,13 +471,13 @@ export default function BookingPage() {
                   { label: "Check-in",  val: checkIn  ? fmtDate(checkIn)  : "Select date" },
                   { label: "Check-out", val: checkOut ? fmtDate(checkOut) : "Select date" },
                 ].map(({ label, val }) => (
-                  <div key={label} className="bg-charcoal px-5 py-4">
-                    <p className="font-jost text-body/55 text-[9px] tracking-widest uppercase mb-1">
+                  <div key={label} className="bg-charcoal px-5 py-5">
+                    <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-1">
                       {label}
                     </p>
                     <p className={[
-                      "font-cormorant font-light text-2xl tracking-[0.04em] italic",
-                      val.includes("Select") ? "text-body/50" : "text-cream",
+                      "font-cormorant font-light text-[28px] tracking-[0.04em] italic",
+                      val.includes("Select") ? "text-body/50" : "text-[#F5F0E8]",
                     ].join(" ")}>
                       {val}
                     </p>
@@ -412,7 +509,7 @@ export default function BookingPage() {
 
               {/* Guests + Promo */}
               <div className="border border-white/[0.06] bg-[#0D0D0D] p-5 md:p-7">
-                <p className="font-jost text-body/55 text-[9px] tracking-widest uppercase mb-3">
+                <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-3">
                   Guests
                 </p>
                 <Counter label="Adults"                value={adults}   min={1} max={10} onChange={v => { setAdults(v); if (v + children > 12) setChildren(12 - v); }} />
@@ -434,7 +531,7 @@ export default function BookingPage() {
                       type="button"
                       onClick={handleApplyPromo}
                       disabled={!promo.trim() || promoLoading}
-                      className="shrink-0 border border-gold/50 px-4 font-jost text-[10px] tracking-widest
+                      className="shrink-0 border border-gold/50 px-5 font-jost text-[11px] tracking-widest
                                  uppercase text-cream/80 hover:border-gold hover:bg-gold/[0.08]
                                  disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
                     >
@@ -442,12 +539,12 @@ export default function BookingPage() {
                     </button>
                   </div>
                   {promoApplied && (
-                    <p className="mt-2 font-jost text-[10px] tracking-wider text-emerald-400">
+                    <p className="mt-2 font-jost text-[11px] tracking-wider text-emerald-400">
                       ✓ {promoApplied.code} applied — {promoApplied.discount}% off!
                     </p>
                   )}
                   {promoError && (
-                    <p className="mt-2 font-jost text-[10px] tracking-wider text-red-400">
+                    <p className="mt-2 font-jost text-[11px] tracking-wider text-red-400">
                       {promoError}
                     </p>
                   )}
@@ -460,10 +557,10 @@ export default function BookingPage() {
                 onClick={handleCheckAvailability}
                 disabled={!checkIn || !checkOut || rangeHasBlocked || !!pricing?.rateUnavailable}
                 className={[
-                  "w-full py-[15px] font-jost text-[11px] tracking-widest uppercase",
+                  "w-full py-[16px] font-jost text-[13px] font-medium tracking-widest uppercase",
                   "border transition-all duration-300",
                   checkIn && checkOut && !rangeHasBlocked && !pricing?.rateUnavailable
-                    ? "border-gold text-cream bg-gold/[0.08] hover:bg-gold/[0.14] cursor-pointer"
+                    ? "border-gold text-cream bg-gold/[0.1] hover:bg-gold/[0.18] cursor-pointer"
                     : "border-white/[0.07] text-body/30 cursor-not-allowed",
                 ].join(" ")}
                 whileHover={checkIn && checkOut && !pricing?.rateUnavailable ? { scale: 1.005 } : {}}
@@ -491,7 +588,7 @@ export default function BookingPage() {
             <div className="flex flex-col gap-6">
               {/* Key info card */}
               <div className="border border-white/[0.07] bg-[#0D0D0D] p-6">
-                <p className="section-label mb-4">Villa Details</p>
+                <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-4">Villa Details</p>
                 <div className="flex flex-col gap-3">
                   {[
                     "5 bedrooms · 10 pax occupancy",
@@ -501,8 +598,8 @@ export default function BookingPage() {
                     "Sound policy strictly followed",
                   ].map(note => (
                     <div key={note} className="flex items-start gap-3">
-                      <div className="mt-[5px] w-1 h-1 rounded-full bg-gold/40 shrink-0" />
-                      <p className="font-jost text-body/75 text-[11px] tracking-[0.03em] leading-relaxed">
+                      <div className="mt-[6px] w-1 h-1 rounded-full bg-gold/40 shrink-0" />
+                      <p className="font-jost text-[#F5F0E8]/70 text-[13px] tracking-[0.03em] leading-relaxed">
                         {note}
                       </p>
                     </div>
@@ -512,7 +609,7 @@ export default function BookingPage() {
 
               {/* Offers */}
               <div className="border border-gold/15 bg-gold/[0.03] p-6">
-                <p className="section-label mb-4">Exclusive Offers</p>
+                <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-4">Exclusive Offers</p>
                 <div className="flex flex-col gap-4">
                   {[
                     { badge: "10% Off", text: "When you book directly from our official website" },
@@ -520,11 +617,11 @@ export default function BookingPage() {
                     { badge: "Free",    text: "Welcome drinks on arrival for all guests" },
                   ].map(o => (
                     <div key={o.text} className="flex items-start gap-3">
-                      <span className="font-jost text-[8px] tracking-widest uppercase
+                      <span className="font-jost text-[9px] tracking-widest uppercase
                                        border border-gold/35 text-gold/70 px-2 py-[3px] shrink-0 mt-[1px]">
                         {o.badge}
                       </span>
-                      <p className="font-jost text-cream/80 text-[11px] tracking-[0.03em] leading-relaxed">
+                      <p className="font-jost text-[#F5F0E8]/80 text-[13px] tracking-[0.03em] leading-relaxed">
                         {o.text}
                       </p>
                     </div>
@@ -534,7 +631,7 @@ export default function BookingPage() {
 
               {/* USP list */}
               <div className="border border-white/[0.06] bg-[#0D0D0D] p-6">
-                <p className="section-label mb-4">Why Azara</p>
+                <p className="font-jost text-gold text-[11px] tracking-[0.18em] uppercase mb-4">Why Azara</p>
                 <div className="flex flex-col divide-y divide-white/[0.05]">
                   {[
                     "Private Swimming Pool & Jacuzzi",
@@ -543,13 +640,13 @@ export default function BookingPage() {
                     "In-house Chef with 2 Butlers",
                     "Early check-in & late check-out available",
                   ].map(usp => (
-                    <div key={usp} className="flex items-center gap-3 py-[10px]">
+                    <div key={usp} className="flex items-center gap-3 py-[11px]">
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" strokeWidth="2" strokeLinecap="round"
                         className="text-gold/60 shrink-0">
                         <path d="M20 6L9 17l-5-5" />
                       </svg>
-                      <p className="font-jost text-cream/80 text-[11px] tracking-[0.03em]">
+                      <p className="font-jost text-[#F5F0E8]/80 text-[13px] tracking-[0.03em]">
                         {usp}
                       </p>
                     </div>
@@ -1024,9 +1121,9 @@ export default function BookingPage() {
                       <Label>Phone Number *</Label>
                       <div className="flex">
                         <select value={cc} onChange={e => setCC(e.target.value)}
-                          className="bg-white/[0.03] border border-r-0 border-white/[0.2]
-                                     px-2 py-[13px] font-jost text-body/60 text-[12px]
-                                     focus:outline-none focus:border-gold/50 shrink-0
+                          className="bg-[#1A1A1A] border border-r-0 border-[rgba(184,151,106,0.3)]
+                                     px-2 py-[14px] font-jost text-[#F5F0E8]/70 text-[13px]
+                                     focus:outline-none focus:border-[#B8976A] shrink-0
                                      transition-colors duration-300 cursor-pointer appearance-none"
                           style={{ width: "90px" }}>
                           {COUNTRY_CODES.map(c => (
@@ -1086,23 +1183,23 @@ export default function BookingPage() {
                                 onChange={() => setPayOpt(opt.val)}
                                 className="mt-[3px] accent-gold" />
                               <div className="flex-1">
-                                <p className="font-jost text-cream/80 text-[12px] tracking-[0.03em]">
+                                <p className="font-jost text-[#F5F0E8]/90 text-[14px] tracking-[0.03em]">
                                   {opt.label}
                                 </p>
                                 <div className="flex gap-5 mt-2">
                                   <div>
-                                    <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase">
+                                    <p className="font-jost text-gold/50 text-[10px] tracking-widest uppercase">
                                       Pay now
                                     </p>
-                                    <p className="font-jost text-gold text-[13px] mt-[1px]">
+                                    <p className="font-jost text-gold text-[14px] mt-[1px]">
                                       {formatINR(opt.payNow)}
                                     </p>
                                   </div>
                                   <div>
-                                    <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase">
+                                    <p className="font-jost text-gold/50 text-[10px] tracking-widest uppercase">
                                       Pay later
                                     </p>
-                                    <p className="font-jost text-cream/60 text-[13px] mt-[1px]">
+                                    <p className="font-jost text-[#F5F0E8]/60 text-[14px] mt-[1px]">
                                       {opt.payLater > 0 ? formatINR(opt.payLater) : "₹0.00"}
                                     </p>
                                   </div>
@@ -1132,8 +1229,8 @@ export default function BookingPage() {
                           {/* Dates */}
                           <div className="flex justify-between">
                             <div>
-                              <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase">Check-in</p>
-                              <p className="font-jost text-cream/70 text-[12px] mt-[2px]">{fmtDate(checkIn)}</p>
+                              <p className="font-jost text-gold/50 text-[10px] tracking-[0.15em] uppercase">Check-in</p>
+                              <p className="font-jost text-[#F5F0E8]/80 text-[13px] mt-[2px]">{fmtDate(checkIn)}</p>
                             </div>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                               stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"
@@ -1141,8 +1238,8 @@ export default function BookingPage() {
                               <path d="M9 18l6-6-6-6" />
                             </svg>
                             <div className="text-right">
-                              <p className="font-jost text-body/35 text-[10px] tracking-widest uppercase">Check-out</p>
-                              <p className="font-jost text-cream/70 text-[12px] mt-[2px]">{fmtDate(checkOut)}</p>
+                              <p className="font-jost text-gold/50 text-[10px] tracking-[0.15em] uppercase">Check-out</p>
+                              <p className="font-jost text-[#F5F0E8]/80 text-[13px] mt-[2px]">{fmtDate(checkOut)}</p>
                             </div>
                           </div>
 
@@ -1150,8 +1247,8 @@ export default function BookingPage() {
 
                           {/* Guests */}
                           <div className="flex justify-between">
-                            <span className="font-jost text-body/50 text-[11px]">Guests</span>
-                            <span className="font-jost text-cream/70 text-[11px]">
+                            <span className="font-jost text-[#F5F0E8]/50 text-[12px]">Guests</span>
+                            <span className="font-jost text-[#F5F0E8]/80 text-[12px]">
                               {adults} adult{adults !== 1 ? "s" : ""}
                               {children > 0 ? `, ${children} child${children !== 1 ? "ren" : ""}` : ""}
                             </span>
@@ -1160,28 +1257,28 @@ export default function BookingPage() {
                           {/* Room breakdown */}
                           {pricing.displayDiscount > 0 && (
                             <div className="flex justify-between">
-                              <span className="font-jost text-body/40 text-[11px] line-through">
+                              <span className="font-jost text-[#F5F0E8]/40 text-[12px] line-through">
                                 Rack Rate · {pricing.nights} night{pricing.nights !== 1 ? "s" : ""}
                               </span>
-                              <span className="font-jost text-body/40 text-[11px] line-through">
+                              <span className="font-jost text-[#F5F0E8]/40 text-[12px] line-through">
                                 {formatINR(pricing.rackTotal)}
                               </span>
                             </div>
                           )}
                           <div className="flex justify-between">
-                            <span className="font-jost text-body/50 text-[11px]">
+                            <span className="font-jost text-[#F5F0E8]/55 text-[12px]">
                               {pricing.displayDiscount > 0 ? `Your Rate (${pricing.displayDiscount}% off)` : `Villa · ${pricing.nights} night${pricing.nights !== 1 ? "s" : ""}`}
                             </span>
-                            <span className={["font-jost text-[11px]", pricing.displayDiscount > 0 ? "text-gold" : "text-cream/70"].join(" ")}>
+                            <span className={["font-jost text-[12px]", pricing.displayDiscount > 0 ? "text-gold" : "text-[#F5F0E8]/80"].join(" ")}>
                               {formatINR(pricing.baseTotal)}
                             </span>
                           </div>
                           {discountedPricing && (
                             <div className="flex justify-between">
-                              <span className="font-jost text-emerald-400/70 text-[11px]">
+                              <span className="font-jost text-emerald-400/70 text-[12px]">
                                 Promo ({promoApplied!.discount}% off)
                               </span>
-                              <span className="font-jost text-emerald-400/70 text-[11px]">
+                              <span className="font-jost text-emerald-400/70 text-[12px]">
                                 −{formatINR(discountedPricing.discountAmount)}
                               </span>
                             </div>
@@ -1191,12 +1288,12 @@ export default function BookingPage() {
 
                           {/* Subtotal */}
                           <div className="flex justify-between">
-                            <span className="font-jost text-body/50 text-[11px]">Sub Total</span>
-                            <span className="font-jost text-cream/70 text-[11px]">{formatINR(discountedPricing?.discountedBase ?? pricing.baseTotal)}</span>
+                            <span className="font-jost text-[#F5F0E8]/55 text-[12px]">Sub Total</span>
+                            <span className="font-jost text-[#F5F0E8]/80 text-[12px]">{formatINR(discountedPricing?.discountedBase ?? pricing.baseTotal)}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="font-jost text-body/50 text-[11px]">GST & Fees (18%)</span>
-                            <span className="font-jost text-cream/70 text-[11px]">{formatINR((discountedPricing ?? pricing).gstAmount)}</span>
+                            <span className="font-jost text-[#F5F0E8]/55 text-[12px]">GST & Fees (18%)</span>
+                            <span className="font-jost text-[#F5F0E8]/80 text-[12px]">{formatINR((discountedPricing ?? pricing).gstAmount)}</span>
                           </div>
 
                           <div className="h-px bg-gold/20" />
@@ -1243,8 +1340,8 @@ export default function BookingPage() {
                           </svg>
                         )}
                       </div>
-                      <p className="font-jost text-body/45 text-[10px] tracking-[0.03em] leading-relaxed
-                                    group-hover:text-body/70 transition-colors duration-200">
+                      <p className="font-jost text-[#F5F0E8]/50 text-[12px] tracking-[0.03em] leading-relaxed
+                                    group-hover:text-[#F5F0E8]/70 transition-colors duration-200">
                         By completing this reservation you are accepting our{" "}
                         <span className="text-gold/70 underline underline-offset-2 cursor-pointer">
                           Terms & Conditions
@@ -1257,17 +1354,17 @@ export default function BookingPage() {
                     </label>
 
                     <div className="flex flex-col gap-3">
-                      <p className="font-jost text-body/35 text-[9px] tracking-wider text-center">
-                        Last step — confirm your stay now
+                      <p className="font-jost text-body/35 text-[10px] tracking-wider text-center">
+                        Secure payment via Razorpay
                       </p>
                       <button
                         type="submit"
                         disabled={!agreed || submitting || !firstName || !email || !phone}
                         className={[
-                          "w-full py-4 font-jost text-[11px] tracking-widest uppercase",
+                          "w-full py-4 font-jost text-[12px] tracking-widest uppercase font-medium",
                           "border transition-all duration-300 flex items-center justify-center gap-3",
                           agreed && !submitting && firstName && email && phone
-                            ? "border-gold text-cream bg-gold/[0.1] hover:bg-gold/[0.18] cursor-pointer"
+                            ? "border-gold text-cream bg-gold/[0.12] hover:bg-gold/[0.22] cursor-pointer"
                             : "border-white/[0.07] text-body/25 cursor-not-allowed",
                         ].join(" ")}
                       >
@@ -1278,9 +1375,18 @@ export default function BookingPage() {
                               <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeOpacity="0.25" />
                               <path d="M21 12a9 9 0 00-9-9" />
                             </svg>
-                            Confirming Booking…
+                            Processing Payment…
                           </>
-                        ) : "Confirm Booking"}
+                        ) : (
+                          <>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                              <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                              <line x1="1" y1="10" x2="23" y2="10" />
+                            </svg>
+                            Pay Now — {formatINR(payOpt === "50" ? (discountedPricing ?? pricing)!.halfPayNow : (discountedPricing ?? pricing)!.grandTotal)}
+                          </>
+                        )}
                       </button>
 
                       {/* Error message */}

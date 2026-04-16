@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Jost } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import Script from "next/script";
 import "./globals.css";
 import PublicLayout from "@/components/PublicLayout";
 
@@ -42,6 +43,7 @@ export default function RootLayout({
       <body className="bg-charcoal text-cream antialiased">
         <PublicLayout>{children}</PublicLayout>
         <Analytics />
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>
     </html>
   );

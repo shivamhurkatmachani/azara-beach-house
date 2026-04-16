@@ -9,28 +9,33 @@ datasource db {
 }
 
 model Booking {
-  id              String   @id @default(cuid())
-  ref             String   @unique
-  createdAt       DateTime @default(now())
-  checkIn         DateTime
-  checkOut        DateTime
-  nights          Int
-  adults          Int
-  children        Int      @default(0)
-  firstName       String
-  lastName        String
-  email           String
-  phone           String
-  gstNumber       String?
-  specialRequests String?
-  promoCode       String?
-  paymentOption   String
-  baseTotal       Int
-  gstAmount       Int
-  grandTotal      Int
-  status          String   @default("pending")
-  paidAmount      Int      @default(0)
-  adminNotes      String?
+  id                 String   @id @default(cuid())
+  ref                String   @unique
+  createdAt          DateTime @default(now())
+  checkIn            DateTime
+  checkOut           DateTime
+  nights             Int
+  adults             Int
+  children           Int      @default(0)
+  firstName          String
+  lastName           String
+  email              String
+  phone              String
+  gstNumber          String?
+  specialRequests    String?
+  promoCode          String?
+  paymentOption      String
+  baseTotal          Int
+  gstAmount          Int
+  grandTotal         Int
+  status             String   @default("pending")
+  paidAmount         Int      @default(0)
+  adminNotes         String?
+  razorpayOrderId    String?
+  razorpayPaymentId  String?
+  razorpaySignature  String?
+  paymentStatus      String   @default("PENDING")
+  amountDue          Int      @default(0)
 }
 
 model BlockedDate {
