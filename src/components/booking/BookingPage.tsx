@@ -292,9 +292,10 @@ export default function BookingPage() {
       const orderData = await orderRes.json();
 
       // Step 2: Open Razorpay checkout modal
-      const rzpKey = orderData.key_id;
-      console.log("[Razorpay] key:", rzpKey ? `${rzpKey.slice(0, 8)}...` : "MISSING");
-      if (!rzpKey) throw new Error("Payment configuration error. Please contact support.");
+      const rzpKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      console.log("[Razorpay] orderData:", orderData);
+      console.log("[Razorpay] key:", rzpKey);
+      console.log("[Razorpay] amount (paise):", orderData.amount);
 
       const options: Record<string, unknown> = {
         key: rzpKey,
