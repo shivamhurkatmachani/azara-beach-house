@@ -41,12 +41,20 @@ export async function POST(req: Request) {
       },
     });
 
-    console.log("[Razorpay] Order created:", { id: order.id, amount: order.amount, status: order.status });
+    const keyPrefix = (process.env.RAZORPAY_KEY_ID || "").slice(0, 12);
+    console.log("[Razorpay] Order created:", {
+      id: order.id,
+      amount: order.amount,
+      typeof_amount: typeof order.amount,
+      status: order.status,
+      key_prefix: keyPrefix,
+    });
 
     return NextResponse.json({
       order_id: order.id,
-      amount: order.amount,
+      amount: Number(order.amount),
       currency: order.currency,
+      key: process.env.RAZORPAY_KEY_ID,
     });
   } catch (err) {
     console.error("Razorpay order creation error:", err);

@@ -292,14 +292,15 @@ export default function BookingPage() {
       const orderData = await orderRes.json();
 
       // Step 2: Open Razorpay checkout modal
-      const rzpKey = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-      console.log("[Razorpay] orderData:", orderData);
-      console.log("[Razorpay] key:", rzpKey);
-      console.log("[Razorpay] amount (paise):", orderData.amount);
+      const rzpKey = orderData.key;
+      const rzpAmount = Number(orderData.amount);
+      console.log("[Razorpay] key:", rzpKey, "typeof:", typeof rzpKey);
+      console.log("[Razorpay] amount:", rzpAmount, "typeof:", typeof rzpAmount);
+      console.log("[Razorpay] order_id:", orderData.order_id);
 
       const options: Record<string, unknown> = {
         key: rzpKey,
-        amount: orderData.amount,
+        amount: rzpAmount,
         currency: orderData.currency,
         name: "Azara Beach House",
         description: `Booking for ${fmtDate(checkIn)} to ${fmtDate(checkOut)}`,
