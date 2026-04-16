@@ -292,8 +292,12 @@ export default function BookingPage() {
       const orderData = await orderRes.json();
 
       // Step 2: Open Razorpay checkout modal
+      const rzpKey = orderData.key_id;
+      console.log("[Razorpay] key:", rzpKey ? `${rzpKey.slice(0, 8)}...` : "MISSING");
+      if (!rzpKey) throw new Error("Payment configuration error. Please contact support.");
+
       const options: Record<string, unknown> = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        key: rzpKey,
         amount: orderData.amount,
         currency: orderData.currency,
         name: "Azara Beach House",
